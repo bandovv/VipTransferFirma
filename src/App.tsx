@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MapPin, Navigation, Check, Loader2, ChevronLeft, ChevronRight, Star, Shield, Award, Quote } from 'lucide-react';
 import sClassImage from './assets/cars/s-class.png';
-import vClassImage from './assets/cars/v-class.png';
 import gClassImage from './assets/cars/g-class.png';
 
 const cars = [
@@ -14,17 +13,8 @@ const cars = [
     luggage: '3 Duże Walizki',
     basePrice: 2000,
     bgLabel: 'S-CLASS',
-    imageUrl: sClassImage
-  },
-  {
-    id: 'v-class',
-    name: 'Mercedes-Benz V-Klasa',
-    tag: 'Komfort Premium 2025',
-    seats: '5 Pasażerów',
-    luggage: '5 Dużych Walizek',
-    basePrice: 1500,
-    bgLabel: 'V-CLASS',
-    imageUrl: vClassImage
+    imageUrl: sClassImage,
+    imageClassName: 'scale-[1.05] translate-x-1 sm:translate-x-2'
   },
   {
     id: 'g-class',
@@ -34,7 +24,8 @@ const cars = [
     luggage: '4 Duże Walizki',
     basePrice: 2000,
     bgLabel: 'G-CLASS',
-    imageUrl: gClassImage
+    imageUrl: gClassImage,
+    imageClassName: 'scale-[0.97] -translate-y-1'
   }
 ];
 
@@ -48,7 +39,7 @@ const testimonials = [
   },
   {
     id: 2,
-    text: "Korzystaliśmy z V-Klasy podczas wyjazdu firmowego. Niesamowity komfort, mnóstwo miejsca na bagaże i pełen profesjonalizm. Idealne rozwiązanie dla grup ceniących standard premium.",
+    text: "Zamówiliśmy przejazd premium dla zarządu na całodzienny cykl spotkań. Auto było perfekcyjnie przygotowane, kierowca dyskretny i punktualny, a cały serwis bez zarzutu.",
     author: "Anna W.",
     role: "Dyrektor HR",
     rating: 5
@@ -246,6 +237,7 @@ export default function App() {
   };
 
   const car = cars[carIndex];
+  const nextCarPreview = cars[(carIndex + 1) % cars.length];
   
   // Pricing Logic
   let total = 0;
@@ -339,12 +331,12 @@ export default function App() {
                   <span className="text-accent uppercase tracking-[4px] text-xs lg:text-sm mb-3 block font-medium">
                     {car.tag}
                   </span>
-                  <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl xl:text-7xl leading-tight">
+                  <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl xl:text-7xl leading-[1.02] tracking-tight">
                     {car.name}
                   </h1>
                 </div>
                 
-                <div className="flex flex-wrap gap-8 lg:gap-12 mb-12">
+                <div className="flex flex-wrap gap-8 lg:gap-12 mb-10">
                   <div className="flex flex-col gap-1.5">
                     <span className="text-[10px] lg:text-xs text-text-muted uppercase tracking-[1px] font-bold">Miejsca</span>
                     <span className="text-sm lg:text-base font-medium">{car.seats}</span>
@@ -360,10 +352,26 @@ export default function App() {
                 </div>
 
                 {/* Car Image Wrapper */}
-                <div className="w-full h-[250px] sm:h-[300px] lg:h-[350px] relative flex items-center justify-center mb-12">
+                <div className="w-full h-[280px] sm:h-[340px] lg:h-[400px] relative flex items-center justify-center mb-10">
                   {/* Decorative glow behind the car */}
-                  <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(212,175,55,0.15)_0%,_transparent_70%)] z-0"></div>
-                  
+                  <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(212,175,55,0.18)_0%,_rgba(212,175,55,0.06)_35%,_transparent_74%)] z-0"></div>
+                  <div className="absolute bottom-3 left-1/2 -translate-x-1/2 w-[70%] h-8 bg-black/45 blur-xl rounded-full z-0"></div>
+
+                  {/* Dimmed preview of next car in background */}
+                  {!imageErrors[nextCarPreview.id] && (
+                    <motion.img
+                      key={`bg-next-${carIndex}`}
+                      initial={{ opacity: 0, x: 30 }}
+                      animate={{ opacity: 0.17, x: 0 }}
+                      exit={{ opacity: 0, x: -30 }}
+                      transition={{ duration: 0.5, ease: "easeOut" }}
+                      src={nextCarPreview.imageUrl}
+                      alt={`${nextCarPreview.name} podgląd`}
+                      onError={() => handleImageError(nextCarPreview.id)}
+                      className={`w-[86%] h-[86%] object-contain object-center absolute z-[1] translate-x-12 scale-[0.93] grayscale brightness-[0.45] saturate-75 blur-[1.6px] pointer-events-none ${nextCarPreview.imageClassName || ''}`}
+                    />
+                  )}
+
                   {!imageErrors[car.id] ? (
                     <motion.img
                       key={`img-${carIndex}`}
@@ -373,9 +381,8 @@ export default function App() {
                       transition={{ duration: 0.5, ease: "easeOut" }}
                       src={car.imageUrl}
                       alt={car.name}
-                      referrerPolicy="no-referrer"
                       onError={() => handleImageError(car.id)}
-                      className="w-full h-full object-contain relative z-10 drop-shadow-[0_20px_30px_rgba(0,0,0,0.6)]"
+                      className={`w-full h-full object-contain object-center relative z-10 drop-shadow-[0_24px_35px_rgba(0,0,0,0.72)] ${car.imageClassName || ''}`}
                     />
                   ) : (
                     <div className="w-full h-full bg-gradient-to-r from-transparent via-[rgba(212,175,55,0.05)] to-transparent rounded border border-dashed border-[#333] relative flex items-center justify-center overflow-hidden z-10">
@@ -385,25 +392,37 @@ export default function App() {
                       </div>
                     </div>
                   )}
+
+                  <button
+                    onClick={prevCar}
+                    aria-label="Poprzedni samochód"
+                    className="absolute left-0 sm:-left-2 lg:-left-6 top-1/2 -translate-y-1/2 w-14 h-14 lg:w-[76px] lg:h-[76px] border border-border/80 hover:border-accent bg-[#090909]/78 hover:bg-[#111111]/95 backdrop-blur-md text-white flex items-center justify-center transition-all duration-300 rounded-full group cursor-pointer z-20 shadow-[0_10px_24px_rgba(0,0,0,0.45)]"
+                  >
+                    <ChevronLeft className="w-7 h-7 lg:w-8 lg:h-8 group-hover:text-accent transition-colors" />
+                  </button>
+                  <button
+                    onClick={nextCar}
+                    aria-label="Następny samochód"
+                    className="absolute right-0 sm:-right-2 lg:-right-6 top-1/2 -translate-y-1/2 w-14 h-14 lg:w-[76px] lg:h-[76px] border border-border/80 hover:border-accent bg-[#090909]/78 hover:bg-[#111111]/95 backdrop-blur-md text-white flex items-center justify-center transition-all duration-300 rounded-full group cursor-pointer z-20 shadow-[0_10px_24px_rgba(0,0,0,0.45)]"
+                  >
+                    <ChevronRight className="w-7 h-7 lg:w-8 lg:h-8 group-hover:text-accent transition-colors" />
+                  </button>
+                </div>
+
+                <div className="flex items-center justify-center gap-3 mt-auto">
+                  {cars.map((fleetCar, idx) => (
+                    <button
+                      key={fleetCar.id}
+                      onClick={() => setCarIndex(idx)}
+                      aria-label={`Pokaż ${fleetCar.name}`}
+                      className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
+                        idx === carIndex ? 'w-12 bg-accent' : 'w-6 bg-[#2a2a2a] hover:bg-[#3a3a3a]'
+                      }`}
+                    />
+                  ))}
                 </div>
               </motion.div>
             </AnimatePresence>
-
-            {/* Navigation */}
-            <div className="flex gap-4 mt-auto">
-              <button 
-                onClick={prevCar}
-                className="w-12 h-12 lg:w-14 lg:h-14 border border-border hover:border-accent bg-transparent text-white flex items-center justify-center transition-colors rounded-sm group cursor-pointer"
-              >
-                <ChevronLeft className="w-5 h-5 group-hover:text-accent transition-colors" />
-              </button>
-              <button 
-                onClick={nextCar}
-                className="w-12 h-12 lg:w-14 lg:h-14 border border-border hover:border-accent bg-transparent text-white flex items-center justify-center transition-colors rounded-sm group cursor-pointer"
-              >
-                <ChevronRight className="w-5 h-5 group-hover:text-accent transition-colors" />
-              </button>
-            </div>
           </div>
         </div>
 
@@ -604,7 +623,7 @@ export default function App() {
               </div>
               <h3 className="text-lg font-bold uppercase tracking-widest mb-4">Nasza Flota</h3>
               <p className="text-text-muted text-sm leading-relaxed">
-                Oferujemy szeroką gamę luksusowych pojazdów na każdą okazję. Nasze limuzyny dodają elegancji, a V-Klasy komfortowo mieszczą większe grupy.
+                Oferujemy starannie wyselekcjonowaną flotę luksusowych pojazdów na każdą okazję. S-Klasa zapewnia reprezentacyjny komfort, a G-Klasa podkreśla wyjątkowy charakter każdego przejazdu.
               </p>
             </div>
           </div>
