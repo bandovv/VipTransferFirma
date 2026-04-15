@@ -1,0 +1,671 @@
+import { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { MapPin, Navigation, Check, Loader2, ChevronLeft, ChevronRight, Star, Shield, Award, Quote } from 'lucide-react';
+import sClassImage from './assets/cars/s-class.png';
+import vClassImage from './assets/cars/v-class.png';
+import gClassImage from './assets/cars/g-class.png';
+
+const cars = [
+  {
+    id: 's-class',
+    name: 'Mercedes-Benz S-Klasa',
+    tag: 'Flota Flagowa 2025',
+    seats: '3-4 Pasażerów',
+    luggage: '3 Duże Walizki',
+    basePrice: 2000,
+    bgLabel: 'S-CLASS',
+    imageUrl: sClassImage
+  },
+  {
+    id: 'v-class',
+    name: 'Mercedes-Benz V-Klasa',
+    tag: 'Komfort Premium 2025',
+    seats: '5 Pasażerów',
+    luggage: '5 Dużych Walizek',
+    basePrice: 1500,
+    bgLabel: 'V-CLASS',
+    imageUrl: vClassImage
+  },
+  {
+    id: 'g-class',
+    name: 'Mercedes-Benz G-Klasa',
+    tag: 'Ikona Stylu 2024',
+    seats: '3-4 Pasażerów',
+    luggage: '4 Duże Walizki',
+    basePrice: 2000,
+    bgLabel: 'G-CLASS',
+    imageUrl: gClassImage
+  }
+];
+
+const testimonials = [
+  {
+    id: 1,
+    text: "Absolutnie najwyższy poziom usług. Kierowca był przed czasem, S-Klasa w idealnym stanie, a podróż z Warszawy do Krakowa minęła niepostrzeżenie. Polecam każdemu, kto ceni luksus i spokój.",
+    author: "Michał K.",
+    role: "CEO, TechCorp",
+    rating: 5
+  },
+  {
+    id: 2,
+    text: "Korzystaliśmy z V-Klasy podczas wyjazdu firmowego. Niesamowity komfort, mnóstwo miejsca na bagaże i pełen profesjonalizm. Idealne rozwiązanie dla grup ceniących standard premium.",
+    author: "Anna W.",
+    role: "Dyrektor HR",
+    rating: 5
+  },
+  {
+    id: 3,
+    text: "Wynajęliśmy G-Klasę do ślubu wraz z pakietem dekoracji. Samochód zrobił ogromne wrażenie na gościach, a obsługa była bezbłędna. Dziękujemy za uczynienie naszego dnia wyjątkowym!",
+    author: "Karolina i Piotr",
+    role: "Nowożeńcy",
+    rating: 5
+  }
+];
+
+type BookingMode = 'transfer' | 'hourly' | 'fullday';
+
+interface AddressInputProps {
+  label: string;
+  value: string;
+  onChange: (val: string) => void;
+  placeholder: string;
+  icon: any;
+  iconClassName?: string;
+}
+
+function AddressInput({ label, value, onChange, placeholder, icon: Icon, iconClassName }: AddressInputProps) {
+  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [isOpen, setIsOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!value || value.length < 3) {
+      setSuggestions([]);
+      return;
+    }
+    
+    const timeoutId = setTimeout(async () => {
+      setLoading(true);
+      try {
+        const res = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(value)}&limit=5`);
+        const data = await res.json();
+        setSuggestions(data.features || []);
+        setIsOpen(true);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoading(false);
+      }
+    }, 400);
+    return () => clearTimeout(timeoutId);
+  }, [value]);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleSelect = (suggestion: any) => {
+    const p = suggestion.properties;
+    const mainText = p.name;
+    const subTextParts = [p.street, p.city, p.state, p.country].filter(Boolean);
+    const subText = Array.from(new Set(subTextParts)).filter(x => x !== mainText).join(', ');
+    
+    const fullAddress = subText ? `${mainText}, ${subText}` : mainText;
+    onChange(fullAddress);
+    setIsOpen(false);
+  };
+
+  return (
+    <div className="flex flex-col gap-2 relative" ref={wrapperRef}>
+      <label className="text-[10px] text-accent font-bold tracking-wider uppercase">{label}</label>
+      <div className="relative">
+        <Icon className={`absolute left-0 top-1/2 -translate-y-1/2 w-4 h-4 ${iconClassName || 'text-accent'}`} />
+        <input
+          type="text"
+          value={value}
+          onChange={e => {
+            onChange(e.target.value);
+            setIsOpen(true);
+          }}
+          onFocus={() => value.length >= 3 && setIsOpen(true)}
+          placeholder={placeholder}
+          className="w-full bg-transparent border-b border-[#333] pb-2 pl-7 text-sm text-white focus:outline-none focus:border-accent transition-colors placeholder:text-[#555]"
+        />
+        {loading && <Loader2 className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted animate-spin" />}
+      </div>
+      
+      {isOpen && suggestions.length > 0 && (
+        <div className="absolute top-[calc(100%+4px)] left-0 right-0 bg-white text-black rounded shadow-2xl z-50 overflow-hidden border border-gray-200">
+          {suggestions.map((s, i) => {
+            const p = s.properties;
+            const mainText = p.name;
+            const subTextParts = [p.street, p.city, p.state, p.country].filter(Boolean);
+            const subText = Array.from(new Set(subTextParts)).filter(x => x !== mainText).join(', ');
+            
+            return (
+              <div 
+                key={i} 
+                className="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-0 flex items-center gap-3 transition-colors"
+                onClick={() => handleSelect(s)}
+              >
+                <MapPin className="w-4 h-4 text-gray-400 shrink-0" />
+                <div className="flex flex-col overflow-hidden">
+                  <span className="text-sm font-bold text-gray-900 truncate">{mainText}</span>
+                  {subText && <span className="text-xs text-gray-500 truncate">{subText}</span>}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function App() {
+  const [carIndex, setCarIndex] = useState(0);
+  const [bookingMode, setBookingMode] = useState<BookingMode>('transfer');
+  const [origin, setOrigin] = useState('');
+  const [destination, setDestination] = useState('');
+  const [hours, setHours] = useState<number>(2);
+  const [distance, setDistance] = useState<number | null>(null);
+  const [isCalculating, setIsCalculating] = useState(false);
+  const [isCalculated, setIsCalculated] = useState(false);
+  const [weddingPackage, setWeddingPackage] = useState(false);
+  const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    setIsCalculated(false);
+    setDistance(null);
+  }, [origin, destination]);
+
+  useEffect(() => {
+    if (bookingMode === 'transfer') {
+      setWeddingPackage(false);
+    }
+  }, [bookingMode]);
+
+  const handleCalculate = async () => {
+    if (!origin) {
+      alert("Proszę podać miejsce odbioru.");
+      return;
+    }
+    if (bookingMode === 'transfer' && !destination) {
+      alert("Proszę podać cel dla transferu.");
+      return;
+    }
+
+    setIsCalculating(true);
+    try {
+      if (origin && destination) {
+        const res1 = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(origin)}`);
+        const data1 = await res1.json();
+        const res2 = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(destination)}`);
+        const data2 = await res2.json();
+
+        if (data1.length > 0 && data2.length > 0) {
+          const lon1 = data1[0].lon, lat1 = data1[0].lat;
+          const lon2 = data2[0].lon, lat2 = data2[0].lat;
+          const routeRes = await fetch(`https://router.project-osrm.org/route/v1/driving/${lon1},${lat1};${lon2},${lat2}?overview=false`);
+          const routeData = await routeRes.json();
+
+          if (routeData.routes && routeData.routes.length > 0) {
+            setDistance(Math.ceil(routeData.routes[0].distance / 1000));
+          } else {
+            alert("Nie udało się wyznaczyć trasy. Spróbuj wpisać dokładniejszy adres.");
+            setDistance(0);
+          }
+        } else {
+          alert("Nie znaleziono podanych adresów. Spróbuj wpisać dokładniejszy adres.");
+          setDistance(0);
+        }
+      } else {
+        setDistance(0);
+      }
+      setIsCalculated(true);
+    } catch (error) {
+      console.error(error);
+      alert("Wystąpił błąd podczas wyceny.");
+    } finally {
+      setIsCalculating(false);
+    }
+  };
+
+  const nextCar = () => setCarIndex((prev) => (prev + 1) % cars.length);
+  const prevCar = () => setCarIndex((prev) => (prev - 1 + cars.length) % cars.length);
+
+  const handleImageError = (id: string) => {
+    setImageErrors(prev => ({ ...prev, [id]: true }));
+  };
+
+  const car = cars[carIndex];
+  
+  // Pricing Logic
+  let total = 0;
+  let baseText = '';
+  let distanceText = '';
+  let extraDist = 0;
+  let distCost = 0;
+  let baseCost = 0;
+
+  if (bookingMode === 'transfer') {
+    baseCost = car.basePrice;
+    baseText = `Opłata bazowa (${car.name})`;
+    extraDist = distance ? Math.max(0, distance - 150) : 0;
+    distCost = extraDist * 10;
+    if (extraDist > 0) distanceText = `Dopłata za dystans (${extraDist} km x 10 PLN)`;
+    total = baseCost + distCost;
+  } else if (bookingMode === 'hourly') {
+    const h = Math.max(2, hours);
+    baseCost = h * 500; // 500 PLN per hour, min 1000 PLN
+    baseText = `Wynajem na godziny (${h}h)`;
+    extraDist = distance ? Math.max(0, distance - 100) : 0; // 100km limit
+    distCost = extraDist * 12; // 12 PLN per extra km
+    if (extraDist > 0) distanceText = `Dopłata za dystans pow. 100km (${extraDist} km x 12 PLN)`;
+    total = baseCost + distCost + (weddingPackage ? 600 : 0);
+  } else if (bookingMode === 'fullday') {
+    baseCost = 2500; // 8h full day package
+    baseText = `Pakiet całodniowy (8h)`;
+    extraDist = distance ? Math.max(0, distance - 250) : 0; // 250km limit
+    distCost = extraDist * 12; // 12 PLN per extra km
+    if (extraDist > 0) distanceText = `Dopłata za dystans pow. 250km (${extraDist} km x 12 PLN)`;
+    total = baseCost + distCost + (weddingPackage ? 600 : 0);
+  }
+
+  return (
+    <div className="w-full flex flex-col bg-bg text-text-main font-sans overflow-x-hidden">
+      {/* Header */}
+      <header className="flex justify-between items-center p-6 lg:px-12 lg:py-8 border-b border-border shrink-0 relative z-50 bg-bg/90 backdrop-blur-md sticky top-0">
+        <div className="font-display text-xl lg:text-2xl font-bold tracking-[2px] text-accent">
+          LUXEDRIVE.PL
+        </div>
+        <div className="text-xs lg:text-sm tracking-[1px] text-text-muted hidden sm:block">
+          +48 500 000 000 &bull; WARSZAWA, POLSKA
+        </div>
+      </header>
+
+      {/* Hero Section (Carousel + Booking) */}
+      <section className="grid grid-cols-1 lg:grid-cols-[1fr_400px] xl:grid-cols-[1fr_450px] min-h-[calc(100vh-90px)] relative">
+        
+        {/* Showcase Section */}
+        <div className="relative p-8 lg:p-16 flex flex-col justify-center border-r border-border overflow-hidden bg-bg min-h-[600px]">
+          
+          {/* Animated Background Labels */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={`bg-${carIndex}`}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 1.05 }}
+              transition={{ duration: 0.6, ease: "easeInOut" }}
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[100px] sm:text-[140px] lg:text-[200px] xl:text-[240px] font-black text-[#0a0a0a] whitespace-nowrap pointer-events-none z-0 tracking-tighter select-none"
+            >
+              {car.bgLabel}
+            </motion.div>
+          </AnimatePresence>
+
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={`shadow-${carIndex}`}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 0.1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.6, ease: "easeInOut" }}
+              className="absolute right-[-20px] lg:right-[-80px] top-1/2 -translate-y-1/2 grayscale text-[50px] sm:text-[80px] lg:text-[100px] font-display italic text-text-muted z-0 pointer-events-none select-none"
+            >
+              {cars[(carIndex + 1) % cars.length].bgLabel}
+            </motion.div>
+          </AnimatePresence>
+
+          {/* Car Info */}
+          <div className="relative z-10 max-w-3xl w-full mx-auto lg:mx-0">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={`info-${carIndex}`}
+                initial={{ opacity: 0, x: 30 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -30 }}
+                transition={{ duration: 0.4, ease: "easeOut" }}
+                className="flex flex-col h-full"
+              >
+                <div className="mb-8">
+                  <span className="text-accent uppercase tracking-[4px] text-xs lg:text-sm mb-3 block font-medium">
+                    {car.tag}
+                  </span>
+                  <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl xl:text-7xl leading-tight">
+                    {car.name}
+                  </h1>
+                </div>
+                
+                <div className="flex flex-wrap gap-8 lg:gap-12 mb-12">
+                  <div className="flex flex-col gap-1.5">
+                    <span className="text-[10px] lg:text-xs text-text-muted uppercase tracking-[1px] font-bold">Miejsca</span>
+                    <span className="text-sm lg:text-base font-medium">{car.seats}</span>
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <span className="text-[10px] lg:text-xs text-text-muted uppercase tracking-[1px] font-bold">Bagaże</span>
+                    <span className="text-sm lg:text-base font-medium">{car.luggage}</span>
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <span className="text-[10px] lg:text-xs text-text-muted uppercase tracking-[1px] font-bold">Baza</span>
+                    <span className="text-sm lg:text-base font-medium text-accent">od {car.basePrice} PLN</span>
+                  </div>
+                </div>
+
+                {/* Car Image Wrapper */}
+                <div className="w-full h-[250px] sm:h-[300px] lg:h-[350px] relative flex items-center justify-center mb-12">
+                  {/* Decorative glow behind the car */}
+                  <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(212,175,55,0.15)_0%,_transparent_70%)] z-0"></div>
+                  
+                  {!imageErrors[car.id] ? (
+                    <motion.img
+                      key={`img-${carIndex}`}
+                      initial={{ opacity: 0, x: 50, scale: 0.95 }}
+                      animate={{ opacity: 1, x: 0, scale: 1 }}
+                      exit={{ opacity: 0, x: -50, scale: 0.95 }}
+                      transition={{ duration: 0.5, ease: "easeOut" }}
+                      src={car.imageUrl}
+                      alt={car.name}
+                      referrerPolicy="no-referrer"
+                      onError={() => handleImageError(car.id)}
+                      className="w-full h-full object-contain relative z-10 drop-shadow-[0_20px_30px_rgba(0,0,0,0.6)]"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-r from-transparent via-[rgba(212,175,55,0.05)] to-transparent rounded border border-dashed border-[#333] relative flex items-center justify-center overflow-hidden z-10">
+                      <div className="text-center text-text-muted relative z-10">
+                        <div className="text-3xl lg:text-5xl font-display mb-2 text-white/80">{car.name}</div>
+                        <div className="text-[10px] lg:text-xs tracking-[3px] uppercase">Wizualizacja niedostępna</div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            </AnimatePresence>
+
+            {/* Navigation */}
+            <div className="flex gap-4 mt-auto">
+              <button 
+                onClick={prevCar}
+                className="w-12 h-12 lg:w-14 lg:h-14 border border-border hover:border-accent bg-transparent text-white flex items-center justify-center transition-colors rounded-sm group cursor-pointer"
+              >
+                <ChevronLeft className="w-5 h-5 group-hover:text-accent transition-colors" />
+              </button>
+              <button 
+                onClick={nextCar}
+                className="w-12 h-12 lg:w-14 lg:h-14 border border-border hover:border-accent bg-transparent text-white flex items-center justify-center transition-colors rounded-sm group cursor-pointer"
+              >
+                <ChevronRight className="w-5 h-5 group-hover:text-accent transition-colors" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Booking Panel */}
+        <div className="bg-surface p-6 lg:p-10 flex flex-col gap-6 border-t lg:border-t-0 lg:border-l border-border relative z-20 shadow-2xl lg:shadow-none">
+          <div className="flex flex-col gap-4 mb-2">
+            <h2 className="text-xl lg:text-2xl font-bold leading-tight font-display">Wycena &<br/>Rezerwacja</h2>
+            <div className="flex bg-[#1a1a1a] rounded p-1 border border-[#222]">
+              <button 
+                onClick={() => setBookingMode('transfer')}
+                className={`flex-1 px-2 py-2 text-xs font-medium rounded shadow-sm cursor-pointer transition-colors ${bookingMode === 'transfer' ? 'bg-[#2a2a2a] text-accent' : 'text-text-muted hover:text-white'}`}>
+                Transfer
+              </button>
+              <button 
+                onClick={() => setBookingMode('hourly')}
+                className={`flex-1 px-2 py-2 text-xs font-medium rounded shadow-sm cursor-pointer transition-colors ${bookingMode === 'hourly' ? 'bg-[#2a2a2a] text-accent' : 'text-text-muted hover:text-white'}`}>
+                Na godziny
+              </button>
+              <button 
+                onClick={() => setBookingMode('fullday')}
+                className={`flex-1 px-2 py-2 text-xs font-medium rounded shadow-sm cursor-pointer transition-colors ${bookingMode === 'fullday' ? 'bg-[#2a2a2a] text-accent' : 'text-text-muted hover:text-white'}`}>
+                Całodniowy
+              </button>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-6">
+            <AddressInput
+              label="Odbiór"
+              value={origin}
+              onChange={setOrigin}
+              placeholder="Np. Lotnisko Chopina, Warszawa"
+              icon={MapPin}
+              iconClassName="text-accent"
+            />
+
+            <AddressInput
+              label="Cel"
+              value={destination}
+              onChange={setDestination}
+              placeholder={bookingMode === 'transfer' ? "Np. Hotel Bristol, Warszawa" : "Opcjonalnie (do wyceny dystansu)"}
+              icon={Navigation}
+              iconClassName="text-text-muted"
+            />
+
+            <div className="grid grid-cols-2 gap-6">
+              <div className="flex flex-col gap-2">
+                <label className="text-[10px] text-accent font-bold tracking-wider uppercase">Data</label>
+                <input
+                  type="date"
+                  className="w-full bg-transparent border-b border-[#333] pb-2 text-sm text-white focus:outline-none focus:border-accent transition-colors [color-scheme:dark]"
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="text-[10px] text-accent font-bold tracking-wider uppercase">Godzina</label>
+                <input
+                  type="time"
+                  className="w-full bg-transparent border-b border-[#333] pb-2 text-sm text-white focus:outline-none focus:border-accent transition-colors [color-scheme:dark]"
+                />
+              </div>
+            </div>
+
+            {bookingMode === 'hourly' && (
+              <div className="flex flex-col gap-2">
+                <label className="text-[10px] text-accent font-bold tracking-wider uppercase">Ilość godzin (min. 2)</label>
+                <input
+                  type="number"
+                  min="2"
+                  value={hours}
+                  onChange={e => setHours(Math.max(2, parseInt(e.target.value) || 2))}
+                  className="w-full bg-transparent border-b border-[#333] pb-2 text-sm text-white focus:outline-none focus:border-accent transition-colors"
+                />
+              </div>
+            )}
+
+            {(bookingMode === 'hourly' || bookingMode === 'fullday') && (
+              <div className="flex flex-col gap-2 mt-2">
+                <label className="text-[10px] text-accent font-bold tracking-wider uppercase">Pakiety Dodatkowe</label>
+                <div
+                  onClick={() => setWeddingPackage(!weddingPackage)}
+                  className={`p-3 border ${weddingPackage ? 'border-accent bg-[rgba(212,175,55,0.05)]' : 'border-[#333] bg-[#1a1a1a] hover:border-[#444]'} flex items-center gap-3 cursor-pointer rounded transition-all duration-300`}
+                >
+                  <div className={`w-5 h-5 rounded flex items-center justify-center transition-colors ${weddingPackage ? 'bg-accent text-black' : 'border border-[#555] bg-transparent'}`}>
+                    {weddingPackage && <Check className="w-3.5 h-3.5 stroke-[3]" />}
+                  </div>
+                  <div>
+                    <div className="text-sm font-medium text-white">Pakiet Ślubny</div>
+                    <div className="text-xs text-text-muted mt-0.5">Dekoracja auta (+600 PLN)</div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="mt-auto pt-8 border-t border-[#222] flex flex-col gap-5">
+            {isCalculated ? (
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex flex-col gap-4"
+              >
+                <div className="text-xs text-text-muted flex flex-col gap-2 bg-[#1a1a1a] p-4 rounded border border-[#222]">
+                  {distance !== null && distance > 0 && (
+                    <>
+                      <div className="flex justify-between items-center">
+                        <span>Szacowany dystans:</span>
+                        <span className="text-white font-medium">{distance} km</span>
+                      </div>
+                      <div className="w-full h-px bg-[#333] my-1"></div>
+                    </>
+                  )}
+                  <div className="flex justify-between items-center">
+                    <span>{baseText}:</span>
+                    <span className="text-white">{baseCost} PLN</span>
+                  </div>
+                  {extraDist > 0 && (
+                    <div className="flex justify-between items-center">
+                      <span>{distanceText}:</span>
+                      <span className="text-white">+{distCost} PLN</span>
+                    </div>
+                  )}
+                  {(bookingMode === 'hourly' || bookingMode === 'fullday') && weddingPackage && (
+                    <div className="flex justify-between items-center">
+                      <span>Pakiet Ślubny:</span>
+                      <span className="text-white">+600 PLN</span>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="flex justify-between items-end px-1">
+                  <span className="text-[10px] text-text-muted uppercase tracking-widest font-bold">Szacowany Koszt</span>
+                  <span className="text-3xl lg:text-4xl font-display font-bold text-accent">{total} PLN</span>
+                </div>
+                
+                <button className="w-full bg-accent hover:bg-accent-hover text-black font-bold py-4 rounded text-sm tracking-widest uppercase transition-colors flex justify-center items-center gap-2 mt-2 cursor-pointer">
+                  Rezerwuj Transfer
+                </button>
+              </motion.div>
+            ) : (
+              <button
+                onClick={handleCalculate}
+                disabled={isCalculating || !origin || (bookingMode === 'transfer' && !destination)}
+                className="w-full bg-[#cda951] hover:bg-[#b5952f] disabled:opacity-50 disabled:cursor-not-allowed text-black font-bold py-4 rounded text-sm tracking-widest uppercase transition-colors flex justify-center items-center gap-2 cursor-pointer"
+              >
+                {isCalculating ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <span>Obliczanie...</span>
+                  </>
+                ) : (
+                  'Wyceń Trasę'
+                )}
+              </button>
+            )}
+
+            <div className="text-center text-[10px] text-text-muted mt-2 tracking-wide">
+              Kontekst miasta uzupełniony • Natychmiastowe potwierdzenie • Stała cena
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Mission & Commitment Section */}
+      <section className="py-24 px-6 lg:px-12 bg-[#0a0a0a] border-t border-border">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="font-display text-3xl lg:text-4xl mb-4">Wybór Premium dla Wymagających</h2>
+            <p className="text-text-muted max-w-2xl mx-auto text-sm lg:text-base leading-relaxed">
+              LuxeDrive to wiodąca firma transportowa w Polsce, oferująca najbardziej luksusową flotę pojazdów. 
+              Obsługujemy transfery lotniskowe, spotkania biznesowe, śluby oraz wyjazdy prywatne, gwarantując najwyższy standard.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 lg:gap-20">
+            <div className="flex flex-col items-center text-center group">
+              <div className="w-16 h-16 rounded-full border border-[#333] flex items-center justify-center mb-6 group-hover:border-accent transition-colors">
+                <Star className="w-6 h-6 text-accent" />
+              </div>
+              <h3 className="text-lg font-bold uppercase tracking-widest mb-4">Nasza Misja</h3>
+              <p className="text-text-muted text-sm leading-relaxed">
+                Dostarczanie każdemu klientowi światowej klasy transportu. Nasi szoferzy dążą do tego, aby każda podróż była niezapomnianym i bezstresowym doświadczeniem.
+              </p>
+            </div>
+
+            <div className="flex flex-col items-center text-center group">
+              <div className="w-16 h-16 rounded-full border border-[#333] flex items-center justify-center mb-6 group-hover:border-accent transition-colors">
+                <Shield className="w-6 h-6 text-accent" />
+              </div>
+              <h3 className="text-lg font-bold uppercase tracking-widest mb-4">Nasze Zobowiązanie</h3>
+              <p className="text-text-muted text-sm leading-relaxed">
+                Od lat utrzymujemy pozycję lidera w branży luksusowego transportu. Nasze całodobowe biuro dyspozytorskie zapewnia najwyższą jakość obsługi o każdej porze.
+              </p>
+            </div>
+
+            <div className="flex flex-col items-center text-center group">
+              <div className="w-16 h-16 rounded-full border border-[#333] flex items-center justify-center mb-6 group-hover:border-accent transition-colors">
+                <Award className="w-6 h-6 text-accent" />
+              </div>
+              <h3 className="text-lg font-bold uppercase tracking-widest mb-4">Nasza Flota</h3>
+              <p className="text-text-muted text-sm leading-relaxed">
+                Oferujemy szeroką gamę luksusowych pojazdów na każdą okazję. Nasze limuzyny dodają elegancji, a V-Klasy komfortowo mieszczą większe grupy.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section className="py-24 px-6 lg:px-12 bg-bg border-t border-border">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
+            <div>
+              <span className="text-accent uppercase tracking-[4px] text-xs font-medium mb-3 block">Doświadczenia</span>
+              <h2 className="font-display text-3xl lg:text-4xl">Co Mówią Nasi Klienci</h2>
+            </div>
+            <div className="flex gap-1">
+              {[...Array(5)].map((_, i) => (
+                <Star key={i} className="w-5 h-5 fill-accent text-accent" />
+              ))}
+              <span className="ml-3 text-sm text-text-muted font-medium">Średnia ocen 5.0/5</span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {testimonials.map((testimonial) => (
+              <div 
+                key={testimonial.id} 
+                className="bg-surface p-8 border border-[#222] hover:border-accent/50 transition-colors flex flex-col h-full rounded-sm relative group"
+              >
+                <Quote className="absolute top-6 right-6 w-8 h-8 text-[#222] group-hover:text-accent/20 transition-colors" />
+                <div className="flex gap-1 mb-6">
+                  {[...Array(testimonial.rating)].map((_, i) => (
+                    <Star key={i} className="w-4 h-4 fill-accent text-accent" />
+                  ))}
+                </div>
+                <p className="text-text-muted text-sm leading-relaxed mb-8 flex-1 italic">
+                  "{testimonial.text}"
+                </p>
+                <div className="mt-auto pt-6 border-t border-[#222]">
+                  <div className="font-bold text-white text-sm">{testimonial.author}</div>
+                  <div className="text-xs text-accent mt-1">{testimonial.role}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-[#050505] py-12 px-6 lg:px-12 border-t border-[#222] text-center md:text-left">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+          <div>
+            <div className="font-display text-xl font-bold tracking-[2px] text-accent mb-2">LUXEDRIVE.PL</div>
+            <div className="text-xs text-text-muted">© 2026 LuxeDrive. Wszelkie prawa zastrzeżone.</div>
+          </div>
+          <div className="flex gap-6 text-xs text-text-muted uppercase tracking-wider">
+            <a href="#" className="hover:text-accent transition-colors">Regulamin</a>
+            <a href="#" className="hover:text-accent transition-colors">Polityka Prywatności</a>
+            <a href="#" className="hover:text-accent transition-colors">Kontakt</a>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}
