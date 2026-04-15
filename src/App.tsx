@@ -1,13 +1,15 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MapPin, Navigation, Check, Loader2, ChevronLeft, ChevronRight, Star, Shield, Award, Quote, Phone, Mail } from 'lucide-react';
+import sClassImage from './assets/cars/s-class.png';
+import gClassImage from './assets/cars/g-class.png';
 
+const BRAND_NAME = 'VipTransferBialystok';
+const BRAND_DISPLAY = 'VIP Transfer Białystok';
 const CONTACT_PHONE_DISPLAY = '600 479 905';
 const CONTACT_PHONE_TEL = '+48600479905';
 /** Podmień na docelowy adres e-mail. */
-const CONTACT_EMAIL = 'kontakt@luxedrive.pl';
-import sClassImage from './assets/cars/s-class.png';
-import gClassImage from './assets/cars/g-class.png';
+const CONTACT_EMAIL = 'kontakt@viptransferbialystok.pl';
 
 const cars = [
   {
@@ -35,23 +37,20 @@ const cars = [
 const testimonials = [
   {
     id: 1,
-    text: "Absolutnie najwyższy poziom usług. Kierowca był przed czasem, S-Klasa w idealnym stanie, a podróż z Warszawy do Krakowa minęła niepostrzeżenie. Polecam każdemu, kto ceni luksus i spokój.",
+    text: "Profesjonalny, licencjonowany przewóz — w cenie był kierowca i pełna obsługa przewoźnika, bez żadnych niespodzianek. Auto w idealnym stanie, punktualność na najwyższym poziomie. Polecam VipTransferBiałystok każdemu, kto ceni spokój i przejrzyste zasady.",
     author: "Michał K.",
-    role: "CEO, TechCorp",
     rating: 5
   },
   {
     id: 2,
-    text: "Zamówiliśmy przejazd premium dla zarządu na całodzienny cykl spotkań. Auto było perfekcyjnie przygotowane, kierowca dyskretny i punktualny, a cały serwis bez zarzutu.",
+    text: "Zleciliśmy całodniowy przejazd dla zarządu. W wycenie od razu było widać, że usługa przewoźnika jest wliczona — dyskretny kierowca, auto reprezentacyjne, zero chaosu przy rozliczeniu. Firma godna zaufania.",
     author: "Anna W.",
-    role: "Dyrektor HR",
     rating: 5
   },
   {
     id: 3,
-    text: "Wynajęliśmy G-Klasę do ślubu wraz z pakietem dekoracji. Samochód zrobił ogromne wrażenie na gościach, a obsługa była bezbłędna. Dziękujemy za uczynienie naszego dnia wyjątkowym!",
-    author: "Karolina i Piotr",
-    role: "Nowożeńcy",
+    text: "G-Klasa na ślub z pakietem dekoracji — goście byli zachwyceni, a my mieliśmy pewność, że przewóz jest realizowany przez przewoźnika z odpowiednimi uprawnieniami. Całość na najwyższym poziomie.",
+    author: "Karolina",
     rating: 5
   }
 ];
@@ -295,10 +294,10 @@ export default function App() {
       {/* Header */}
       <header className="flex justify-between items-center p-6 lg:px-12 lg:py-8 border-b border-border shrink-0 relative z-50 bg-bg/90 backdrop-blur-md sticky top-0">
         <div className="font-display text-xl lg:text-2xl font-bold tracking-[2px] text-accent">
-          LUXEDRIVE.PL
+          {BRAND_DISPLAY}
         </div>
         <div className="text-xs lg:text-sm tracking-[1px] text-text-muted hidden sm:block">
-          +48 {CONTACT_PHONE_DISPLAY} &bull; WARSZAWA, POLSKA
+          +48 {CONTACT_PHONE_DISPLAY} &bull; BIAŁYSTOK, POLSKA
         </div>
       </header>
 
@@ -328,7 +327,7 @@ export default function App() {
                   </h1>
                 </div>
                 
-                <div className="flex flex-wrap gap-8 lg:gap-12 mb-8 lg:mb-9">
+                <div className="flex flex-wrap gap-8 lg:gap-12 mb-6 lg:mb-7">
                   <div className="flex flex-col gap-1.5">
                     <span className="text-[10px] lg:text-xs text-text-muted uppercase tracking-[1px] font-bold">Miejsca</span>
                     <span className="text-sm lg:text-base font-medium">{car.seats}</span>
@@ -342,6 +341,9 @@ export default function App() {
                     <span className="text-sm lg:text-base font-medium text-accent">od {car.basePrice} PLN</span>
                   </div>
                 </div>
+                <p className="text-[12px] lg:text-sm text-text-muted leading-relaxed max-w-2xl mb-8 lg:mb-9 border-l-2 border-accent/40 pl-4">
+                  <span className="text-white/90 font-medium">{BRAND_DISPLAY}</span> oferuje przewozy pasażerskie w modelu z pełną obsługą licencjonowanego przewoźnika — kierowca, zgłoszenie przewozu oraz standardy bezpieczeństwa są uwzględnione w ramach usługi. Pokazane stawki przy wycenie odnoszą się do kompletnej usługi z przewoźnikiem, bez dopłat „za kierowcę” w drodze.
+                </p>
 
                 {/* Car Image Wrapper */}
                 <div className="w-full h-[320px] sm:h-[390px] lg:h-[480px] xl:h-[520px] relative flex items-center justify-center mb-7 lg:mb-8 overflow-visible">
@@ -407,6 +409,11 @@ export default function App() {
         <div className="bg-surface p-6 lg:p-10 flex flex-col gap-6 border-t lg:border-t-0 lg:border-l border-border relative z-20 shadow-2xl lg:shadow-none">
           <div className="flex flex-col gap-4 mb-2">
             <h2 className="text-xl lg:text-2xl font-bold leading-tight font-display">Wycena &<br/>Rezerwacja</h2>
+            <p className="text-[11px] text-text-muted leading-relaxed">
+              Wszystkie orientacyjne kwoty poniżej obejmują{' '}
+              <span className="text-white/85">usługę licencjonowanego przewoźnika</span> — w cenie jest przewóz osób z kierowcą,
+              zgodnie z obowiązującymi przepisami, bez ukrytych dopłat za „prowadzenie pojazdu”. Ostateczne warunki potwierdzamy przy rezerwacji.
+            </p>
             <div className="flex bg-[#1a1a1a] rounded p-1 border border-[#222]">
               <button 
                 onClick={() => setBookingMode('transfer')}
@@ -491,7 +498,7 @@ export default function App() {
                   className="w-full bg-transparent border-b border-[#333] pb-2 text-sm text-white focus:outline-none focus:border-accent transition-colors"
                 />
                 <p className="text-[11px] text-text-muted leading-relaxed">
-                  Cennik: 1. godz. 1400 PLN, każda kolejna +300 PLN. W cenie {Math.max(1, hours) * 20} km łącznie (20 km na każdą godzinę). Powyżej limitu: +10 PLN za km — podaj trasę w polu „Cel”, aby policzyć dystans.
+                  Cennik: 1. godz. 1400 PLN, każda kolejna +300 PLN. W cenie {Math.max(1, hours) * 20} km łącznie (20 km na każdą godzinę). Powyżej limitu: +10 PLN za km — podaj trasę w polu „Cel”, aby policzyć dystans. Usługa przewoźnika i kierowca są wliczone w podaną stawkę godzinową.
                 </p>
               </div>
             )}
@@ -568,6 +575,9 @@ export default function App() {
                       <span className="text-white">+600 PLN</span>
                     </div>
                   )}
+                  <p className="text-[10px] text-text-muted leading-relaxed pt-1 border-t border-[#2a2a2a] mt-1">
+                    Powyższa kwota szacunkowa uwzględnia przewóz z obsługą przewoźnika (kierowca, licencjonowany przewóz osób). Ewentualne dopłaty dotyczą wyłącznie nadwyżki kilometrów lub pakietów dodatkowych wskazanych w tabeli.
+                  </p>
                 </div>
                 
                 <div className="flex justify-between items-end px-1">
@@ -596,8 +606,8 @@ export default function App() {
               </button>
             )}
 
-            <div className="text-center text-[10px] text-text-muted mt-2 tracking-wide">
-              Kontekst miasta uzupełniony • Natychmiastowe potwierdzenie • Stała cena
+            <div className="text-center text-[10px] text-text-muted mt-2 tracking-wide leading-relaxed">
+              {BRAND_NAME} — przewóz z przewoźnikiem w cenie • Wycena orientacyjna • Potwierdzenie po kontakcie
             </div>
           </div>
         </div>
@@ -610,7 +620,7 @@ export default function App() {
           <h2 className="font-display text-3xl lg:text-4xl mb-5">Potrzebujesz oferty szytej na miarę?</h2>
           <p className="text-text-muted text-sm lg:text-base leading-relaxed mb-10 max-w-2xl mx-auto">
             Planujesz nietypowy przejazd, trasę z wieloma przystankami albo sesję zdjęciową z autem w tle?
-            Napisz lub zadzwoń — przygotujemy indywidualną wycenę dopasowaną do Twojego scenariusza.
+            Napisz lub zadzwoń — przygotujemy indywidualną wycenę dopasowaną do Twojego scenariusza. Każdą ofertę liczymy w oparciu o licencjonowany przewóz osób: przewoźnik, kierowca i bezpieczeństwo trasy są częścią kompletnej usługi, którą opisujemy wprost w kosztorysie.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-10">
             <a
@@ -643,8 +653,8 @@ export default function App() {
           <div className="text-center mb-16">
             <h2 className="font-display text-3xl lg:text-4xl mb-4">Wybór Premium dla Wymagających</h2>
             <p className="text-text-muted max-w-2xl mx-auto text-sm lg:text-base leading-relaxed">
-              LuxeDrive to wiodąca firma transportowa w Polsce, oferująca najbardziej luksusową flotę pojazdów. 
-              Obsługujemy transfery lotniskowe, spotkania biznesowe, śluby oraz wyjazdy prywatne, gwarantując najwyższy standard.
+              <span className="text-white/90 font-medium">{BRAND_DISPLAY}</span> to firma z Białegostoku specjalizująca się w przewozie osób najwyższej klasy.
+              Realizujemy transfery lotniskowe, wyjazdy biznesowe, śluby i przejazdy prywatne — zawsze w ramach usługi licencjonowanego przewoźnika, tak abyś wiedział, że w cenie masz nie tylko auto, ale także profesjonalnego kierowcę i zgodny z prawem przewóz pasażerski.
             </p>
           </div>
 
@@ -655,7 +665,7 @@ export default function App() {
               </div>
               <h3 className="text-lg font-bold uppercase tracking-widest mb-4">Nasza Misja</h3>
               <p className="text-text-muted text-sm leading-relaxed">
-                Dostarczanie każdemu klientowi światowej klasy transportu. Nasi szoferzy dążą do tego, aby każda podróż była niezapomnianym i bezstresowym doświadczeniem.
+                Zapewniać spokojną, przejrzystą usługę: od pierwszego kontaktu wiesz, że współpracujesz z przewoźnikiem, który bierze pełną odpowiedzialność za przewóz. Dbamy o to, by każda podróż była komfortowa, bezpieczna i zgodna z najwyższymi standardami obsługi VIP.
               </p>
             </div>
 
@@ -665,7 +675,7 @@ export default function App() {
               </div>
               <h3 className="text-lg font-bold uppercase tracking-widest mb-4">Nasze Zobowiązanie</h3>
               <p className="text-text-muted text-sm leading-relaxed">
-                Od lat utrzymujemy pozycję lidera w branży luksusowego transportu. Nasze całodobowe biuro dyspozytorskie zapewnia najwyższą jakość obsługi o każdej porze.
+                Żadnych „dopłat za kierowcę” w ostatniej chwili — usługa przewoźnika jest integralną częścią wyceny. Jesteśmy dostępni, gdy planujesz trasę: od krótkiego transferu po całodniową dyspozycję, zawsze z jasnymi zasadami i licencjonowanym przewozem osób.
               </p>
             </div>
 
@@ -675,7 +685,7 @@ export default function App() {
               </div>
               <h3 className="text-lg font-bold uppercase tracking-widest mb-4">Nasza Flota</h3>
               <p className="text-text-muted text-sm leading-relaxed">
-                Oferujemy starannie wyselekcjonowaną flotę luksusowych pojazdów na każdą okazję. S-Klasa zapewnia reprezentacyjny komfort, a G-Klasa podkreśla wyjątkowy charakter każdego przejazdu.
+                Dobieramy auta pod charakter przejazdu: reprezentacyjną S-Klasę oraz charakterystyczną G-Klasę — zawsze w zestawie z doświadczonym kierowcą i pełną obsługą po stronie przewoźnika, tak abyś mógł skupić się na celu podróży, a nie na logistyce.
               </p>
             </div>
           </div>
@@ -689,6 +699,9 @@ export default function App() {
             <div>
               <span className="text-accent uppercase tracking-[4px] text-xs font-medium mb-3 block">Doświadczenia</span>
               <h2 className="font-display text-3xl lg:text-4xl">Co Mówią Nasi Klienci</h2>
+              <p className="text-text-muted text-sm mt-3 max-w-xl leading-relaxed">
+                Poniżej opinie osób, które skorzystały z przewozów {BRAND_DISPLAY}. Wspólny mianownik: przejrzysta współpraca z przewoźnikiem i spokój, że cała usługa — włącznie z kierowcą — była jasno ujęta w ofercie.
+              </p>
             </div>
             <div className="flex gap-1">
               {[...Array(5)].map((_, i) => (
@@ -715,7 +728,6 @@ export default function App() {
                 </p>
                 <div className="mt-auto pt-6 border-t border-[#222]">
                   <div className="font-bold text-white text-sm">{testimonial.author}</div>
-                  <div className="text-xs text-accent mt-1">{testimonial.role}</div>
                 </div>
               </div>
             ))}
@@ -727,8 +739,10 @@ export default function App() {
       <footer className="bg-[#050505] py-12 px-6 lg:px-12 border-t border-[#222] text-center md:text-left">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
           <div>
-            <div className="font-display text-xl font-bold tracking-[2px] text-accent mb-2">LUXEDRIVE.PL</div>
-            <div className="text-xs text-text-muted">© 2026 LuxeDrive. Wszelkie prawa zastrzeżone.</div>
+            <div className="font-display text-xl font-bold tracking-[2px] text-accent mb-2">{BRAND_DISPLAY}</div>
+            <div className="text-xs text-text-muted max-w-md">
+              © 2026 {BRAND_NAME}. Wszelkie prawa zastrzeżone. Przewozy realizowane jako licencjonowany przewóz osób — przewoźnik w cenie usługi.
+            </div>
           </div>
           <div className="flex gap-6 text-xs text-text-muted uppercase tracking-wider">
             <a href="#" className="hover:text-accent transition-colors">Regulamin</a>
