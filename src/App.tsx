@@ -14,7 +14,7 @@ const cars = [
     basePrice: 2000,
     bgLabel: 'S-CLASS',
     imageUrl: sClassImage,
-    imageClassName: 'scale-[1.05] translate-x-1 sm:translate-x-2'
+    imageClassName: 'scale-[1.09]'
   },
   {
     id: 'g-class',
@@ -25,7 +25,7 @@ const cars = [
     basePrice: 2000,
     bgLabel: 'G-CLASS',
     imageUrl: gClassImage,
-    imageClassName: 'scale-[0.97] -translate-y-1'
+    imageClassName: 'scale-[1.01]'
   }
 ];
 
@@ -284,10 +284,10 @@ export default function App() {
       </header>
 
       {/* Hero Section (Carousel + Booking) */}
-      <section className="grid grid-cols-1 lg:grid-cols-[1fr_400px] xl:grid-cols-[1fr_450px] min-h-[calc(100vh-90px)] relative">
+      <section className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_440px] xl:grid-cols-[minmax(0,1fr)_500px] min-h-[calc(100vh-90px)] relative">
         
         {/* Showcase Section */}
-        <div className="relative p-8 lg:p-16 flex flex-col justify-center border-r border-border overflow-hidden bg-bg min-h-[600px]">
+        <div className="relative p-8 lg:p-12 xl:p-14 flex flex-col justify-center border-r border-border overflow-hidden bg-bg min-h-[640px]">
           
           {/* Animated Background Labels */}
           <AnimatePresence mode="wait">
@@ -317,7 +317,7 @@ export default function App() {
           </AnimatePresence>
 
           {/* Car Info */}
-          <div className="relative z-10 max-w-3xl w-full mx-auto lg:mx-0">
+          <div className="relative z-10 max-w-5xl w-full mx-auto lg:mx-0">
             <AnimatePresence mode="wait">
               <motion.div
                 key={`info-${carIndex}`}
@@ -327,16 +327,16 @@ export default function App() {
                 transition={{ duration: 0.4, ease: "easeOut" }}
                 className="flex flex-col h-full"
               >
-                <div className="mb-8">
+                <div className="mb-7 lg:mb-8">
                   <span className="text-accent uppercase tracking-[4px] text-xs lg:text-sm mb-3 block font-medium">
                     {car.tag}
                   </span>
-                  <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl xl:text-7xl leading-[1.02] tracking-tight">
+                  <h1 className="font-display text-4xl sm:text-5xl lg:text-[62px] xl:text-[76px] leading-[1.02] tracking-tight">
                     {car.name}
                   </h1>
                 </div>
                 
-                <div className="flex flex-wrap gap-8 lg:gap-12 mb-10">
+                <div className="flex flex-wrap gap-8 lg:gap-12 mb-8 lg:mb-9">
                   <div className="flex flex-col gap-1.5">
                     <span className="text-[10px] lg:text-xs text-text-muted uppercase tracking-[1px] font-bold">Miejsca</span>
                     <span className="text-sm lg:text-base font-medium">{car.seats}</span>
@@ -352,7 +352,7 @@ export default function App() {
                 </div>
 
                 {/* Car Image Wrapper */}
-                <div className="w-full h-[280px] sm:h-[340px] lg:h-[400px] relative flex items-center justify-center mb-10">
+                <div className="w-full h-[320px] sm:h-[390px] lg:h-[480px] xl:h-[520px] relative flex items-center justify-center mb-7 lg:mb-8">
                   {/* Decorative glow behind the car */}
                   <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(212,175,55,0.18)_0%,_rgba(212,175,55,0.06)_35%,_transparent_74%)] z-0"></div>
                   <div className="absolute bottom-3 left-1/2 -translate-x-1/2 w-[70%] h-8 bg-black/45 blur-xl rounded-full z-0"></div>
@@ -368,7 +368,7 @@ export default function App() {
                       src={nextCarPreview.imageUrl}
                       alt={`${nextCarPreview.name} podgląd`}
                       onError={() => handleImageError(nextCarPreview.id)}
-                      className={`w-[86%] h-[86%] object-contain object-center absolute z-[1] translate-x-12 scale-[0.93] grayscale brightness-[0.45] saturate-75 blur-[1.6px] pointer-events-none ${nextCarPreview.imageClassName || ''}`}
+                      className={`w-[90%] h-[90%] object-contain object-center absolute z-[1] translate-x-12 scale-[0.95] grayscale brightness-[0.45] saturate-75 blur-[1.6px] pointer-events-none ${nextCarPreview.imageClassName || ''}`}
                     />
                   )}
 
@@ -382,7 +382,7 @@ export default function App() {
                       src={car.imageUrl}
                       alt={car.name}
                       onError={() => handleImageError(car.id)}
-                      className={`w-full h-full object-contain object-center relative z-10 drop-shadow-[0_24px_35px_rgba(0,0,0,0.72)] ${car.imageClassName || ''}`}
+                      className={`w-[108%] h-[108%] object-contain object-center relative z-10 drop-shadow-[0_24px_35px_rgba(0,0,0,0.72)] ${car.imageClassName || ''}`}
                     />
                   ) : (
                     <div className="w-full h-full bg-gradient-to-r from-transparent via-[rgba(212,175,55,0.05)] to-transparent rounded border border-dashed border-[#333] relative flex items-center justify-center overflow-hidden z-10">
@@ -409,7 +409,7 @@ export default function App() {
                   </button>
                 </div>
 
-                <div className="flex items-center justify-center gap-3 mt-auto">
+                <div className="flex items-center justify-center gap-3 mt-2 lg:mt-3">
                   {cars.map((fleetCar, idx) => (
                     <button
                       key={fleetCar.id}
