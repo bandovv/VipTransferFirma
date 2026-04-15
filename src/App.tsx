@@ -1,6 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { MapPin, Navigation, Check, Loader2, ChevronLeft, ChevronRight, Star, Shield, Award, Quote } from 'lucide-react';
+import { MapPin, Navigation, Check, Loader2, ChevronLeft, ChevronRight, Star, Shield, Award, Quote, Phone, Mail } from 'lucide-react';
+
+const CONTACT_PHONE_DISPLAY = '600 479 905';
+const CONTACT_PHONE_TEL = '+48600479905';
+/** Podmień na docelowy adres e-mail. */
+const CONTACT_EMAIL = 'kontakt@luxedrive.pl';
 import sClassImage from './assets/cars/s-class.png';
 import gClassImage from './assets/cars/g-class.png';
 
@@ -160,10 +165,11 @@ function AddressInput({ label, value, onChange, placeholder, icon: Icon, iconCla
 
 export default function App() {
   const [carIndex, setCarIndex] = useState(0);
+  const [bookingCarId, setBookingCarId] = useState<string>(cars[0].id);
   const [bookingMode, setBookingMode] = useState<BookingMode>('transfer');
   const [origin, setOrigin] = useState('');
   const [destination, setDestination] = useState('');
-  const [hours, setHours] = useState<number>(2);
+  const [hours, setHours] = useState<number>(1);
   const [distance, setDistance] = useState<number | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
   const [isCalculated, setIsCalculated] = useState(false);
@@ -174,6 +180,10 @@ export default function App() {
     setIsCalculated(false);
     setDistance(null);
   }, [origin, destination]);
+
+  useEffect(() => {
+    setIsCalculated(false);
+  }, [bookingCarId, hours, bookingMode]);
 
   useEffect(() => {
     if (bookingMode === 'transfer') {
@@ -235,7 +245,8 @@ export default function App() {
   };
 
   const car = cars[carIndex];
-  
+  const bookingCar = cars.find((c) => c.id === bookingCarId) ?? cars[0];
+
   // Pricing Logic
   let total = 0;
   let baseText = '';
@@ -245,19 +256,27 @@ export default function App() {
   let baseCost = 0;
 
   if (bookingMode === 'transfer') {
-    baseCost = car.basePrice;
-    baseText = `Opłata bazowa (${car.name})`;
+    baseCost = bookingCar.basePrice;
+    baseText = `Opłata bazowa (${bookingCar.name})`;
     extraDist = distance ? Math.max(0, distance - 150) : 0;
     distCost = extraDist * 10;
     if (extraDist > 0) distanceText = `Dopłata za dystans (${extraDist} km x 10 PLN)`;
     total = baseCost + distCost;
   } else if (bookingMode === 'hourly') {
-    const h = Math.max(2, hours);
-    baseCost = h * 500; // 500 PLN per hour, min 1000 PLN
-    baseText = `Wynajem na godziny (${h}h)`;
-    extraDist = distance ? Math.max(0, distance - 100) : 0; // 100km limit
-    distCost = extraDist * 12; // 12 PLN per extra km
-    if (extraDist > 0) distanceText = `Dopłata za dystans pow. 100km (${extraDist} km x 12 PLN)`;
+    const h = Math.max(1, hours);
+    const firstHour = 1400;
+    const extraHours = Math.max(0, h - 1);
+    baseCost = firstHour + extraHours * 300;
+    baseText =
+      h === 1
+        ? `Wynajem na godziny (1h — ${firstHour} PLN)`
+        : `Wynajem na godziny (${h}h — ${firstHour} PLN + ${extraHours}×300 PLN)`;
+    const includedKm = h * 20;
+    extraDist = distance != null ? Math.max(0, distance - includedKm) : 0;
+    distCost = extraDist * 10;
+    if (extraDist > 0) {
+      distanceText = `Dopłata za km powyżej limitu (${includedKm} km w pakiecie, +${extraDist} km × 10 PLN)`;
+    }
     total = baseCost + distCost + (weddingPackage ? 600 : 0);
   } else if (bookingMode === 'fullday') {
     baseCost = 2500; // 8h full day package
@@ -276,7 +295,7 @@ export default function App() {
           LUXEDRIVE.PL
         </div>
         <div className="text-xs lg:text-sm tracking-[1px] text-text-muted hidden sm:block">
-          +48 500 000 000 &bull; WARSZAWA, POLSKA
+          +48 {CONTACT_PHONE_DISPLAY} &bull; WARSZAWA, POLSKA
         </div>
       </header>
 
@@ -404,6 +423,24 @@ export default function App() {
             </div>
           </div>
 
+          <div className="flex flex-col gap-2">
+            <label className="text-[10px] text-accent font-bold tracking-wider uppercase">Wybór auta do wyceny</label>
+            <p className="text-[11px] text-text-muted leading-relaxed">
+              Wybierz pojazd do kalkulacji — niezależnie od podglądu floty po lewej.
+            </p>
+            <select
+              value={bookingCarId}
+              onChange={(e) => setBookingCarId(e.target.value)}
+              className="w-full bg-[#1a1a1a] border border-[#333] rounded px-3 py-2.5 text-sm text-white focus:outline-none focus:border-accent transition-colors cursor-pointer"
+            >
+              {cars.map((fleet) => (
+                <option key={fleet.id} value={fleet.id}>
+                  {fleet.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <div className="flex flex-col gap-6">
             <AddressInput
               label="Odbiór"
@@ -442,14 +479,17 @@ export default function App() {
 
             {bookingMode === 'hourly' && (
               <div className="flex flex-col gap-2">
-                <label className="text-[10px] text-accent font-bold tracking-wider uppercase">Ilość godzin (min. 2)</label>
+                <label className="text-[10px] text-accent font-bold tracking-wider uppercase">Ilość godzin (min. 1)</label>
                 <input
                   type="number"
-                  min="2"
+                  min="1"
                   value={hours}
-                  onChange={e => setHours(Math.max(2, parseInt(e.target.value) || 2))}
+                  onChange={e => setHours(Math.max(1, parseInt(e.target.value, 10) || 1))}
                   className="w-full bg-transparent border-b border-[#333] pb-2 text-sm text-white focus:outline-none focus:border-accent transition-colors"
                 />
+                <p className="text-[11px] text-text-muted leading-relaxed">
+                  Cennik: 1. godz. 1400 PLN, każda kolejna +300 PLN. W cenie {Math.max(1, hours) * 20} km łącznie (20 km na każdą godzinę). Powyżej limitu: +10 PLN za km — podaj trasę w polu „Cel”, aby policzyć dystans.
+                </p>
               </div>
             )}
 
@@ -480,6 +520,20 @@ export default function App() {
                 className="flex flex-col gap-4"
               >
                 <div className="text-xs text-text-muted flex flex-col gap-2 bg-[#1a1a1a] p-4 rounded border border-[#222]">
+                  <div className="flex justify-between items-center gap-4">
+                    <span>Wybrane auto:</span>
+                    <span className="text-white font-medium text-right">{bookingCar.name}</span>
+                  </div>
+                  <div className="w-full h-px bg-[#333] my-1"></div>
+                  {bookingMode === 'hourly' && (
+                    <div className="flex justify-between items-center gap-4">
+                      <span>Limit km w cenie ({Math.max(1, hours)}h × 20 km):</span>
+                      <span className="text-white font-medium shrink-0">{Math.max(1, hours) * 20} km</span>
+                    </div>
+                  )}
+                  {bookingMode === 'hourly' && distance !== null && distance > 0 && (
+                    <div className="w-full h-px bg-[#333] my-1"></div>
+                  )}
                   {distance !== null && distance > 0 && (
                     <>
                       <div className="flex justify-between items-center">
@@ -581,6 +635,40 @@ export default function App() {
                 Oferujemy starannie wyselekcjonowaną flotę luksusowych pojazdów na każdą okazję. S-Klasa zapewnia reprezentacyjny komfort, a G-Klasa podkreśla wyjątkowy charakter każdego przejazdu.
               </p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Individual quote CTA */}
+      <section className="py-20 px-6 lg:px-12 bg-[#080808] border-t border-border">
+        <div className="max-w-4xl mx-auto text-center">
+          <span className="text-accent uppercase tracking-[4px] text-xs font-medium mb-4 block">Indywidualna wycena</span>
+          <h2 className="font-display text-3xl lg:text-4xl mb-5">Potrzebujesz oferty szytej na miarę?</h2>
+          <p className="text-text-muted text-sm lg:text-base leading-relaxed mb-10 max-w-2xl mx-auto">
+            Planujesz nietypowy przejazd, trasę z wieloma przystankami albo sesję zdjęciową z autem w tle?
+            Napisz lub zadzwoń — przygotujemy indywidualną wycenę dopasowaną do Twojego scenariusza.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-10">
+            <a
+              href={`tel:${CONTACT_PHONE_TEL}`}
+              className="inline-flex items-center gap-3 px-8 py-4 border border-border rounded-sm hover:border-accent hover:bg-[rgba(212,175,55,0.06)] transition-colors text-white"
+            >
+              <Phone className="w-5 h-5 text-accent shrink-0" />
+              <span className="text-left">
+                <span className="block text-[10px] uppercase tracking-widest text-text-muted">Telefon</span>
+                <span className="font-medium">+48 {CONTACT_PHONE_DISPLAY}</span>
+              </span>
+            </a>
+            <a
+              href={`mailto:${CONTACT_EMAIL}`}
+              className="inline-flex items-center gap-3 px-8 py-4 border border-border rounded-sm hover:border-accent hover:bg-[rgba(212,175,55,0.06)] transition-colors text-white"
+            >
+              <Mail className="w-5 h-5 text-accent shrink-0" />
+              <span className="text-left">
+                <span className="block text-[10px] uppercase tracking-widest text-text-muted">E-mail</span>
+                <span className="font-medium break-all">{CONTACT_EMAIL}</span>
+              </span>
+            </a>
           </div>
         </div>
       </section>
