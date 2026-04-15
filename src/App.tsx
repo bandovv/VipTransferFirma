@@ -279,11 +279,14 @@ export default function App() {
     }
     total = baseCost + distCost + (weddingPackage ? 600 : 0);
   } else if (bookingMode === 'fullday') {
-    baseCost = 2500; // 8h full day package
-    baseText = `Pakiet całodniowy (8h)`;
-    extraDist = distance ? Math.max(0, distance - 250) : 0; // 250km limit
-    distCost = extraDist * 12; // 12 PLN per extra km
-    if (extraDist > 0) distanceText = `Dopłata za dystans pow. 250km (${extraDist} km x 12 PLN)`;
+    const includedKmFullDay = 250;
+    baseCost = 3500;
+    baseText = `Pakiet całodniowy (8h, do ${includedKmFullDay} km w cenie)`;
+    extraDist = distance != null ? Math.max(0, distance - includedKmFullDay) : 0;
+    distCost = extraDist * 12;
+    if (extraDist > 0) {
+      distanceText = `Dopłata za km powyżej ${includedKmFullDay} km (${extraDist} km × 12 PLN)`;
+    }
     total = baseCost + distCost + (weddingPackage ? 600 : 0);
   }
 
@@ -531,7 +534,13 @@ export default function App() {
                       <span className="text-white font-medium shrink-0">{Math.max(1, hours) * 20} km</span>
                     </div>
                   )}
-                  {bookingMode === 'hourly' && distance !== null && distance > 0 && (
+                  {bookingMode === 'fullday' && (
+                    <div className="flex justify-between items-center gap-4">
+                      <span>Limit km w cenie (pakiet całodniowy):</span>
+                      <span className="text-white font-medium shrink-0">250 km</span>
+                    </div>
+                  )}
+                  {((bookingMode === 'hourly' || bookingMode === 'fullday') && distance !== null && distance > 0) && (
                     <div className="w-full h-px bg-[#333] my-1"></div>
                   )}
                   {distance !== null && distance > 0 && (
@@ -594,6 +603,40 @@ export default function App() {
         </div>
       </section>
 
+      {/* Individual quote CTA */}
+      <section className="py-20 px-6 lg:px-12 bg-[#080808] border-t border-border">
+        <div className="max-w-4xl mx-auto text-center">
+          <span className="text-accent uppercase tracking-[4px] text-xs font-medium mb-4 block">Indywidualna wycena</span>
+          <h2 className="font-display text-3xl lg:text-4xl mb-5">Potrzebujesz oferty szytej na miarę?</h2>
+          <p className="text-text-muted text-sm lg:text-base leading-relaxed mb-10 max-w-2xl mx-auto">
+            Planujesz nietypowy przejazd, trasę z wieloma przystankami albo sesję zdjęciową z autem w tle?
+            Napisz lub zadzwoń — przygotujemy indywidualną wycenę dopasowaną do Twojego scenariusza.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-10">
+            <a
+              href={`tel:${CONTACT_PHONE_TEL}`}
+              className="inline-flex items-center gap-3 px-8 py-4 border border-border rounded-sm hover:border-accent hover:bg-[rgba(212,175,55,0.06)] transition-colors text-white"
+            >
+              <Phone className="w-5 h-5 text-accent shrink-0" />
+              <span className="text-left">
+                <span className="block text-[10px] uppercase tracking-widest text-text-muted">Telefon</span>
+                <span className="font-medium">+48 {CONTACT_PHONE_DISPLAY}</span>
+              </span>
+            </a>
+            <a
+              href={`mailto:${CONTACT_EMAIL}`}
+              className="inline-flex items-center gap-3 px-8 py-4 border border-border rounded-sm hover:border-accent hover:bg-[rgba(212,175,55,0.06)] transition-colors text-white"
+            >
+              <Mail className="w-5 h-5 text-accent shrink-0" />
+              <span className="text-left">
+                <span className="block text-[10px] uppercase tracking-widest text-text-muted">E-mail</span>
+                <span className="font-medium break-all">{CONTACT_EMAIL}</span>
+              </span>
+            </a>
+          </div>
+        </div>
+      </section>
+
       {/* Mission & Commitment Section */}
       <section className="py-24 px-6 lg:px-12 bg-[#0a0a0a] border-t border-border">
         <div className="max-w-6xl mx-auto">
@@ -635,40 +678,6 @@ export default function App() {
                 Oferujemy starannie wyselekcjonowaną flotę luksusowych pojazdów na każdą okazję. S-Klasa zapewnia reprezentacyjny komfort, a G-Klasa podkreśla wyjątkowy charakter każdego przejazdu.
               </p>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Individual quote CTA */}
-      <section className="py-20 px-6 lg:px-12 bg-[#080808] border-t border-border">
-        <div className="max-w-4xl mx-auto text-center">
-          <span className="text-accent uppercase tracking-[4px] text-xs font-medium mb-4 block">Indywidualna wycena</span>
-          <h2 className="font-display text-3xl lg:text-4xl mb-5">Potrzebujesz oferty szytej na miarę?</h2>
-          <p className="text-text-muted text-sm lg:text-base leading-relaxed mb-10 max-w-2xl mx-auto">
-            Planujesz nietypowy przejazd, trasę z wieloma przystankami albo sesję zdjęciową z autem w tle?
-            Napisz lub zadzwoń — przygotujemy indywidualną wycenę dopasowaną do Twojego scenariusza.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-10">
-            <a
-              href={`tel:${CONTACT_PHONE_TEL}`}
-              className="inline-flex items-center gap-3 px-8 py-4 border border-border rounded-sm hover:border-accent hover:bg-[rgba(212,175,55,0.06)] transition-colors text-white"
-            >
-              <Phone className="w-5 h-5 text-accent shrink-0" />
-              <span className="text-left">
-                <span className="block text-[10px] uppercase tracking-widest text-text-muted">Telefon</span>
-                <span className="font-medium">+48 {CONTACT_PHONE_DISPLAY}</span>
-              </span>
-            </a>
-            <a
-              href={`mailto:${CONTACT_EMAIL}`}
-              className="inline-flex items-center gap-3 px-8 py-4 border border-border rounded-sm hover:border-accent hover:bg-[rgba(212,175,55,0.06)] transition-colors text-white"
-            >
-              <Mail className="w-5 h-5 text-accent shrink-0" />
-              <span className="text-left">
-                <span className="block text-[10px] uppercase tracking-widest text-text-muted">E-mail</span>
-                <span className="font-medium break-all">{CONTACT_EMAIL}</span>
-              </span>
-            </a>
           </div>
         </div>
       </section>
