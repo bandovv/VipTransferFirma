@@ -12,7 +12,6 @@ const cars = [
     seats: '3-4 Pasażerów',
     luggage: '3 Duże Walizki',
     basePrice: 2000,
-    bgLabel: 'S-CLASS',
     imageUrl: sClassImage,
     imageClassName: 'scale-[1.09]'
   },
@@ -23,7 +22,6 @@ const cars = [
     seats: '3-4 Pasażerów',
     luggage: '4 Duże Walizki',
     basePrice: 2000,
-    bgLabel: 'G-CLASS',
     imageUrl: gClassImage,
     imageClassName: 'scale-[1.01]'
   }
@@ -288,33 +286,6 @@ export default function App() {
         
         {/* Showcase Section */}
         <div className="relative p-8 lg:p-12 xl:p-14 flex flex-col justify-center border-r border-border overflow-hidden bg-bg min-h-[640px]">
-          
-          {/* Animated Background Labels */}
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={`bg-${carIndex}`}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 1.05 }}
-              transition={{ duration: 0.6, ease: "easeInOut" }}
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[100px] sm:text-[140px] lg:text-[200px] xl:text-[240px] font-black text-[#0a0a0a] whitespace-nowrap pointer-events-none z-0 tracking-tighter select-none"
-            >
-              {car.bgLabel}
-            </motion.div>
-          </AnimatePresence>
-
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={`shadow-${carIndex}`}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 0.1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.6, ease: "easeInOut" }}
-              className="absolute right-[-20px] lg:right-[-80px] top-1/2 -translate-y-1/2 grayscale text-[50px] sm:text-[80px] lg:text-[100px] font-display italic text-text-muted z-0 pointer-events-none select-none"
-            >
-              {cars[(carIndex + 1) % cars.length].bgLabel}
-            </motion.div>
-          </AnimatePresence>
 
           {/* Car Info */}
           <div className="relative z-10 max-w-5xl w-full mx-auto lg:mx-0">
@@ -352,23 +323,24 @@ export default function App() {
                 </div>
 
                 {/* Car Image Wrapper */}
-                <div className="w-full h-[320px] sm:h-[390px] lg:h-[480px] xl:h-[520px] relative flex items-center justify-center mb-7 lg:mb-8">
+                <div className="w-full h-[320px] sm:h-[390px] lg:h-[480px] xl:h-[520px] relative flex items-center justify-center mb-7 lg:mb-8 overflow-visible">
                   {/* Decorative glow behind the car */}
                   <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(212,175,55,0.18)_0%,_rgba(212,175,55,0.06)_35%,_transparent_74%)] z-0"></div>
                   <div className="absolute bottom-3 left-1/2 -translate-x-1/2 w-[70%] h-8 bg-black/45 blur-xl rounded-full z-0"></div>
 
-                  {/* Dimmed preview of next car in background */}
+                  {/* Next car in stack: same asset style, smaller, dimmed, behind current */}
                   {!imageErrors[nextCarPreview.id] && (
                     <motion.img
                       key={`bg-next-${carIndex}`}
-                      initial={{ opacity: 0, x: 30 }}
-                      animate={{ opacity: 0.17, x: 0 }}
-                      exit={{ opacity: 0, x: -30 }}
-                      transition={{ duration: 0.5, ease: "easeOut" }}
+                      initial={{ opacity: 0, scale: 0.92 }}
+                      animate={{ opacity: 0.38, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.92 }}
+                      transition={{ duration: 0.45, ease: "easeOut" }}
                       src={nextCarPreview.imageUrl}
-                      alt={`${nextCarPreview.name} podgląd`}
+                      alt=""
+                      aria-hidden
                       onError={() => handleImageError(nextCarPreview.id)}
-                      className={`w-[90%] h-[90%] object-contain object-center absolute z-[1] translate-x-12 scale-[0.95] grayscale brightness-[0.45] saturate-75 blur-[1.6px] pointer-events-none ${nextCarPreview.imageClassName || ''}`}
+                      className="pointer-events-none absolute left-1/2 top-1/2 z-[1] h-[62%] w-[62%] max-w-none -translate-x-1/2 -translate-y-1/2 translate-x-[10%] translate-y-[6%] object-contain object-center brightness-[0.42] contrast-[0.95] saturate-[0.85]"
                     />
                   )}
 
@@ -382,7 +354,7 @@ export default function App() {
                       src={car.imageUrl}
                       alt={car.name}
                       onError={() => handleImageError(car.id)}
-                      className={`w-[108%] h-[108%] object-contain object-center relative z-10 drop-shadow-[0_24px_35px_rgba(0,0,0,0.72)] ${car.imageClassName || ''}`}
+                      className={`relative z-10 h-full w-full max-h-full object-contain object-center drop-shadow-[0_24px_35px_rgba(0,0,0,0.72)] ${car.imageClassName || ''}`}
                     />
                   ) : (
                     <div className="w-full h-full bg-gradient-to-r from-transparent via-[rgba(212,175,55,0.05)] to-transparent rounded border border-dashed border-[#333] relative flex items-center justify-center overflow-hidden z-10">
