@@ -235,7 +235,6 @@ export default function App() {
   };
 
   const car = cars[carIndex];
-  const nextCarPreview = cars[(carIndex + 1) % cars.length];
   
   // Pricing Logic
   let total = 0;
@@ -327,22 +326,6 @@ export default function App() {
                   {/* Decorative glow behind the car */}
                   <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(212,175,55,0.18)_0%,_rgba(212,175,55,0.06)_35%,_transparent_74%)] z-0"></div>
                   <div className="absolute bottom-3 left-1/2 -translate-x-1/2 w-[70%] h-8 bg-black/45 blur-xl rounded-full z-0"></div>
-
-                  {/* Next car in stack: same asset style, smaller, dimmed, behind current */}
-                  {!imageErrors[nextCarPreview.id] && (
-                    <motion.img
-                      key={`bg-next-${carIndex}`}
-                      initial={{ opacity: 0, scale: 0.92 }}
-                      animate={{ opacity: 0.38, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.92 }}
-                      transition={{ duration: 0.45, ease: "easeOut" }}
-                      src={nextCarPreview.imageUrl}
-                      alt=""
-                      aria-hidden
-                      onError={() => handleImageError(nextCarPreview.id)}
-                      className="pointer-events-none absolute left-1/2 top-1/2 z-[1] h-[62%] w-[62%] max-w-none -translate-x-1/2 -translate-y-1/2 translate-x-[10%] translate-y-[6%] object-contain object-center brightness-[0.42] contrast-[0.95] saturate-[0.85]"
-                    />
-                  )}
 
                   {!imageErrors[car.id] ? (
                     <motion.img
