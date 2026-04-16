@@ -404,21 +404,26 @@ export default function App() {
                     <span className="text-sm lg:text-base font-medium">{car.luggage}</span>
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <span className="text-[10px] lg:text-xs text-text-muted uppercase tracking-[1px] font-bold">Baza</span>
-                    <span className="text-sm lg:text-base font-medium text-accent">od {car.pricing.transferBase} PLN</span>
+                    <span className="text-[10px] lg:text-xs text-text-muted uppercase tracking-[1px] font-bold">
+                      {car.id === 'g-class' ? 'Baza (1. godz.)' : 'Baza'}
+                    </span>
+                    <span className="text-sm lg:text-base font-medium text-accent">
+                      od {car.id === 'g-class' ? car.pricing.hourlyFirst : car.pricing.transferBase} PLN
+                    </span>
                   </div>
                 </div>
                 <p className="text-[12px] lg:text-sm text-text-muted leading-relaxed max-w-2xl mb-8 lg:mb-9 border-l-2 border-accent/40 pl-4">
                   <span className="text-white/90 font-medium">{BRAND_DISPLAY}</span> oferuje przewozy pasażerskie w modelu z pełną obsługą przewoźnika, zgłoszenie przewozu oraz standardy bezpieczeństwa są uwzględnione w ramach usługi.
                 </p>
 
-                {/* Car Image Wrapper — jednolite tło, kontrolowany blask, bez „czarnych ram” przy PNG */}
-                <div className="w-full min-h-[320px] sm:min-h-[390px] lg:min-h-[480px] xl:min-h-[520px] relative mb-7 lg:mb-8 rounded-2xl overflow-hidden bg-bg isolate border border-white/[0.06]">
-                  <div
-                    className="absolute inset-0 pointer-events-none z-0 bg-[radial-gradient(ellipse_48%_40%_at_50%_56%,rgba(212,175,55,0.11),transparent_68%)]"
-                    aria-hidden
-                  />
-                  <div className="relative z-10 flex min-h-[320px] sm:min-h-[390px] lg:min-h-[480px] xl:min-h-[520px] w-full items-center justify-center px-5 py-8 sm:px-8 sm:py-10">
+                {/* Karuzela: przyciski poza overflow-hidden — nie są przycinane; tło zdjęcia w osobnym zaokrąglonym bloku */}
+                <div className="relative w-full mb-7 lg:mb-8">
+                  <div className="relative w-full min-h-[320px] sm:min-h-[390px] lg:min-h-[480px] xl:min-h-[520px] rounded-2xl overflow-hidden bg-bg isolate border border-white/[0.06]">
+                    <div
+                      className="absolute inset-0 pointer-events-none z-0 bg-[radial-gradient(ellipse_48%_40%_at_50%_56%,rgba(212,175,55,0.11),transparent_68%)]"
+                      aria-hidden
+                    />
+                    <div className="relative z-10 flex min-h-[320px] sm:min-h-[390px] lg:min-h-[480px] xl:min-h-[520px] w-full items-center justify-center px-12 py-8 sm:px-16 sm:py-10 lg:px-20">
                   {!imageErrors[car.id] ? (
                     <motion.img
                       key={`img-${carIndex}`}
@@ -439,21 +444,24 @@ export default function App() {
                       </div>
                     </div>
                   )}
+                    </div>
                   </div>
 
                   <button
+                    type="button"
                     onClick={prevCar}
                     aria-label="Poprzedni samochód"
-                    className="absolute left-0 sm:-left-2 lg:-left-6 top-1/2 -translate-y-1/2 w-14 h-14 lg:w-[76px] lg:h-[76px] border border-border/80 hover:border-accent bg-[#090909]/78 hover:bg-[#111111]/95 backdrop-blur-md text-white flex items-center justify-center transition-all duration-300 rounded-full group cursor-pointer z-20 shadow-[0_10px_24px_rgba(0,0,0,0.45)]"
+                    className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 z-20 flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-full border border-border/60 bg-bg/85 text-white shadow-[0_8px_24px_rgba(0,0,0,0.35)] backdrop-blur-md transition-all duration-300 hover:border-accent/50 hover:bg-bg/95 hover:shadow-[0_10px_28px_rgba(212,175,55,0.12)] cursor-pointer group"
                   >
-                    <ChevronLeft className="w-7 h-7 lg:w-8 lg:h-8 group-hover:text-accent transition-colors" />
+                    <ChevronLeft className="h-5 w-5 text-white/90 group-hover:text-accent transition-colors" strokeWidth={2.25} />
                   </button>
                   <button
+                    type="button"
                     onClick={nextCar}
                     aria-label="Następny samochód"
-                    className="absolute right-0 sm:-right-2 lg:-right-6 top-1/2 -translate-y-1/2 w-14 h-14 lg:w-[76px] lg:h-[76px] border border-border/80 hover:border-accent bg-[#090909]/78 hover:bg-[#111111]/95 backdrop-blur-md text-white flex items-center justify-center transition-all duration-300 rounded-full group cursor-pointer z-20 shadow-[0_10px_24px_rgba(0,0,0,0.45)]"
+                    className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 z-20 flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-full border border-border/60 bg-bg/85 text-white shadow-[0_8px_24px_rgba(0,0,0,0.35)] backdrop-blur-md transition-all duration-300 hover:border-accent/50 hover:bg-bg/95 hover:shadow-[0_10px_28px_rgba(212,175,55,0.12)] cursor-pointer group"
                   >
-                    <ChevronRight className="w-7 h-7 lg:w-8 lg:h-8 group-hover:text-accent transition-colors" />
+                    <ChevronRight className="h-5 w-5 text-white/90 group-hover:text-accent transition-colors" strokeWidth={2.25} />
                   </button>
                 </div>
 
