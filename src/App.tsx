@@ -416,14 +416,14 @@ export default function App() {
                   <span className="text-white/90 font-medium">{BRAND_DISPLAY}</span> oferuje przewozy pasażerskie w modelu z pełną obsługą przewoźnika, zgłoszenie przewozu oraz standardy bezpieczeństwa są uwzględnione w ramach usługi.
                 </p>
 
-                {/* Karuzela: przyciski poza overflow-hidden — nie są przycinane; tło zdjęcia w osobnym zaokrąglonym bloku */}
+                {/* Karuzela: bez obramowania przy zdjęciu — tylko tło i blask; strzałki na zewnątrz overflow */}
                 <div className="relative w-full mb-7 lg:mb-8">
-                  <div className="relative w-full min-h-[320px] sm:min-h-[390px] lg:min-h-[480px] xl:min-h-[520px] rounded-2xl overflow-hidden bg-bg isolate border border-white/[0.06]">
+                  <div className="relative w-full min-h-[320px] sm:min-h-[390px] lg:min-h-[480px] xl:min-h-[520px] overflow-hidden bg-bg isolate">
                     <div
                       className="absolute inset-0 pointer-events-none z-0 bg-[radial-gradient(ellipse_48%_40%_at_50%_56%,rgba(212,175,55,0.11),transparent_68%)]"
                       aria-hidden
                     />
-                    <div className="relative z-10 flex min-h-[320px] sm:min-h-[390px] lg:min-h-[480px] xl:min-h-[520px] w-full items-center justify-center px-12 py-8 sm:px-16 sm:py-10 lg:px-20">
+                    <div className="relative z-10 flex min-h-[320px] sm:min-h-[390px] lg:min-h-[480px] xl:min-h-[520px] w-full items-center justify-center px-[4.5rem] py-8 sm:px-24 sm:py-10 lg:px-28 lg:py-12">
                   {!imageErrors[car.id] ? (
                     <motion.img
                       key={`img-${carIndex}`}
@@ -451,17 +451,17 @@ export default function App() {
                     type="button"
                     onClick={prevCar}
                     aria-label="Poprzedni samochód"
-                    className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 z-20 flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-full border border-border/60 bg-bg/85 text-white shadow-[0_8px_24px_rgba(0,0,0,0.35)] backdrop-blur-md transition-all duration-300 hover:border-accent/50 hover:bg-bg/95 hover:shadow-[0_10px_28px_rgba(212,175,55,0.12)] cursor-pointer group"
+                    className="absolute left-0 sm:left-1 top-1/2 -translate-y-1/2 z-20 flex h-16 w-16 sm:h-[72px] sm:w-[72px] lg:h-20 lg:w-20 items-center justify-center rounded-full border border-border/50 bg-bg/90 text-white shadow-[0_12px_36px_rgba(0,0,0,0.45)] backdrop-blur-md transition-all duration-300 hover:border-accent/55 hover:bg-bg/95 hover:shadow-[0_14px_40px_rgba(212,175,55,0.14)] cursor-pointer group"
                   >
-                    <ChevronLeft className="h-5 w-5 text-white/90 group-hover:text-accent transition-colors" strokeWidth={2.25} />
+                    <ChevronLeft className="h-9 w-9 sm:h-10 sm:w-10 lg:h-11 lg:w-11 text-white/95 group-hover:text-accent transition-colors" strokeWidth={2.5} />
                   </button>
                   <button
                     type="button"
                     onClick={nextCar}
                     aria-label="Następny samochód"
-                    className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 z-20 flex h-11 w-11 sm:h-12 sm:w-12 items-center justify-center rounded-full border border-border/60 bg-bg/85 text-white shadow-[0_8px_24px_rgba(0,0,0,0.35)] backdrop-blur-md transition-all duration-300 hover:border-accent/50 hover:bg-bg/95 hover:shadow-[0_10px_28px_rgba(212,175,55,0.12)] cursor-pointer group"
+                    className="absolute right-0 sm:right-1 top-1/2 -translate-y-1/2 z-20 flex h-16 w-16 sm:h-[72px] sm:w-[72px] lg:h-20 lg:w-20 items-center justify-center rounded-full border border-border/50 bg-bg/90 text-white shadow-[0_12px_36px_rgba(0,0,0,0.45)] backdrop-blur-md transition-all duration-300 hover:border-accent/55 hover:bg-bg/95 hover:shadow-[0_14px_40px_rgba(212,175,55,0.14)] cursor-pointer group"
                   >
-                    <ChevronRight className="h-5 w-5 text-white/90 group-hover:text-accent transition-colors" strokeWidth={2.25} />
+                    <ChevronRight className="h-9 w-9 sm:h-10 sm:w-10 lg:h-11 lg:w-11 text-white/95 group-hover:text-accent transition-colors" strokeWidth={2.5} />
                   </button>
                 </div>
 
