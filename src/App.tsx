@@ -1,7 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MapPin, Navigation, Check, Loader2, ChevronLeft, ChevronRight, Star, Shield, Award, Quote, Phone, Mail } from 'lucide-react';
-import sClassImage from './assets/cars/s-class.png';
+import vClassImage from './assets/cars/v-class.png';
 import gClassImage from './assets/cars/g-class.png';
 
 const BRAND_NAME = 'VipTransferBialystok';
@@ -13,24 +13,25 @@ const CONTACT_EMAIL = 'kontakt@viptransferbialystok.pl';
 
 const cars = [
   {
-    id: 's-class',
-    name: 'Mercedes-Benz S-Klasa',
-    tag: 'Flota Flagowa 2025',
-    seats: '3-4 Pasażerów',
-    luggage: '3 Duże Walizki',
+    id: 'v-class',
+    name: 'Mercedes-Benz V-Klasa',
+    modelLine: '300 d 4MATIC · 2025',
+    specHint: '2.0L diesel · ok. 237 KM',
+    seats: 'do 5 pasażerów (+ kierowca)',
+    luggage: 'Duża przestrzeń bagażowa',
     basePrice: 2000,
-    imageUrl: sClassImage,
-    imageClassName: 'scale-[1.09]'
+    imageUrl: vClassImage,
+    imageClassName: 'scale-[1.02]'
   },
   {
     id: 'g-class',
-    name: 'Mercedes-Benz G-Klasa',
-    tag: 'Ikona Stylu 2024',
+    name: 'Mercedes-AMG G 63',
+    specHint: 'V8 biturbo · ok. 585 KM',
     seats: '3-4 Pasażerów',
     luggage: '4 Duże Walizki',
     basePrice: 2000,
     imageUrl: gClassImage,
-    imageClassName: 'scale-[1.01]'
+    imageClassName: 'scale-[1.02]'
   }
 ];
 
@@ -289,6 +290,26 @@ export default function App() {
     total = baseCost + distCost + (weddingPackage ? 600 : 0);
   }
 
+  const modeComparison = useMemo(() => {
+    const d = distance;
+    const hh = Math.max(1, hours);
+    const wAdd = weddingPackage ? 600 : 0;
+    const transferTotal = bookingCar.basePrice + (d ? Math.max(0, d - 150) * 10 : 0);
+    const hourlyTotal =
+      1400 +
+      Math.max(0, hh - 1) * 300 +
+      (d != null ? Math.max(0, d - hh * 20) * 10 : 0) +
+      wAdd;
+    const fulldayTotal = 3500 + (d != null ? Math.max(0, d - 250) * 12 : 0) + wAdd;
+    const items: { mode: BookingMode; label: string; total: number }[] = [
+      { mode: 'transfer', label: 'Transfer', total: transferTotal },
+      { mode: 'hourly', label: 'Na godziny', total: hourlyTotal },
+      { mode: 'fullday', label: 'Całodniowy', total: fulldayTotal }
+    ];
+    const best = items.reduce((a, b) => (a.total <= b.total ? a : b));
+    return { items, best };
+  }, [bookingCar.basePrice, distance, hours, weddingPackage]);
+
   return (
     <div className="w-full flex flex-col bg-bg text-text-main font-sans overflow-x-hidden">
       {/* Header */}
@@ -319,12 +340,19 @@ export default function App() {
                 className="flex flex-col h-full"
               >
                 <div className="mb-7 lg:mb-8">
-                  <span className="text-accent uppercase tracking-[4px] text-xs lg:text-sm mb-3 block font-medium">
-                    {car.tag}
-                  </span>
                   <h1 className="font-display text-4xl sm:text-5xl lg:text-[62px] xl:text-[76px] leading-[1.02] tracking-tight">
                     {car.name}
                   </h1>
+                  {'modelLine' in car && car.modelLine && (
+                    <p className="text-sm sm:text-base font-medium text-white/75 mt-3 tracking-wide">
+                      {car.modelLine}
+                    </p>
+                  )}
+                  {'specHint' in car && car.specHint && (
+                    <p className="text-[10px] sm:text-[11px] text-text-muted/80 mt-2 tracking-[0.08em] uppercase">
+                      {car.specHint}
+                    </p>
+                  )}
                 </div>
                 
                 <div className="flex flex-wrap gap-8 lg:gap-12 mb-6 lg:mb-7">
@@ -342,7 +370,7 @@ export default function App() {
                   </div>
                 </div>
                 <p className="text-[12px] lg:text-sm text-text-muted leading-relaxed max-w-2xl mb-8 lg:mb-9 border-l-2 border-accent/40 pl-4">
-                  <span className="text-white/90 font-medium">{BRAND_DISPLAY}</span> oferuje przewozy pasażerskie w modelu z pełną obsługą licencjonowanego przewoźnika — kierowca, zgłoszenie przewozu oraz standardy bezpieczeństwa są uwzględnione w ramach usługi. Pokazane stawki przy wycenie odnoszą się do kompletnej usługi z przewoźnikiem, bez dopłat „za kierowcę” w drodze.
+                  <span className="text-white/90 font-medium">{BRAND_DISPLAY}</span> oferuje przewozy pasażerskie w modelu z pełną obsługą przewoźnika, zgłoszenie przewozu oraz standardy bezpieczeństwa są uwzględnione w ramach usługi.
                 </p>
 
                 {/* Car Image Wrapper */}
@@ -410,9 +438,7 @@ export default function App() {
           <div className="flex flex-col gap-4 mb-2">
             <h2 className="text-xl lg:text-2xl font-bold leading-tight font-display">Wycena &<br/>Rezerwacja</h2>
             <p className="text-[11px] text-text-muted leading-relaxed">
-              Wszystkie orientacyjne kwoty poniżej obejmują{' '}
-              <span className="text-white/85">usługę licencjonowanego przewoźnika</span> — w cenie jest przewóz osób z kierowcą,
-              zgodnie z obowiązującymi przepisami, bez ukrytych dopłat za „prowadzenie pojazdu”. Ostateczne warunki potwierdzamy przy rezerwacji.
+              Poniżej orientacyjna kalkulacja — w kwocie uwzględniamy przewóz z kierowcą w ramach usługi przewoźnika. Szczegóły i możliwość realizacji w wybranym terminie ustalamy indywidualnie po kontakcie.
             </p>
             <div className="flex bg-[#1a1a1a] rounded p-1 border border-[#222]">
               <button 
@@ -498,7 +524,7 @@ export default function App() {
                   className="w-full bg-transparent border-b border-[#333] pb-2 text-sm text-white focus:outline-none focus:border-accent transition-colors"
                 />
                 <p className="text-[11px] text-text-muted leading-relaxed">
-                  Cennik: 1. godz. 1400 PLN, każda kolejna +300 PLN. W cenie {Math.max(1, hours) * 20} km łącznie (20 km na każdą godzinę). Powyżej limitu: +10 PLN za km — podaj trasę w polu „Cel”, aby policzyć dystans. Usługa przewoźnika i kierowca są wliczone w podaną stawkę godzinową.
+                  Cennik: 1. godz. 1400 PLN, każda kolejna +300 PLN. W cenie {Math.max(1, hours) * 20} km łącznie (20 km na każdą godzinę). Powyżej limitu: +10 PLN za km — podaj trasę w polu „Cel”, aby policzyć dystans.
                 </p>
               </div>
             )}
@@ -576,7 +602,7 @@ export default function App() {
                     </div>
                   )}
                   <p className="text-[10px] text-text-muted leading-relaxed pt-1 border-t border-[#2a2a2a] mt-1">
-                    Powyższa kwota szacunkowa uwzględnia przewóz z obsługą przewoźnika (kierowca, licencjonowany przewóz osób). Ewentualne dopłaty dotyczą wyłącznie nadwyżki kilometrów lub pakietów dodatkowych wskazanych w tabeli.
+                    Dopłaty w tabeli dotyczą wyłącznie nadwyżki kilometrów lub pakietów dodatkowych — pozostałe elementy usługi są zgodne z wybranym trybem powyżej.
                   </p>
                 </div>
                 
@@ -584,10 +610,33 @@ export default function App() {
                   <span className="text-[10px] text-text-muted uppercase tracking-widest font-bold">Szacowany Koszt</span>
                   <span className="text-3xl lg:text-4xl font-display font-bold text-accent">{total} PLN</span>
                 </div>
+
+                {isCalculated && distance !== null && distance > 0 && (
+                  <div className="rounded border border-[#2a2a2a] bg-[#141414] px-3 py-2.5 text-[10px] text-text-muted leading-relaxed">
+                    <span className="text-white/90">Porównanie trybów przy tej trasie</span> (to samo auto, te same km i opcje): najniższa orientacyjna kwota wychodzi w trybie „
+                    <span className="text-accent font-medium">{modeComparison.best.label}</span>” — ok.{' '}
+                    <span className="text-white font-medium">{modeComparison.best.total} PLN</span>.
+                    {bookingMode !== modeComparison.best.mode && (
+                      <>
+                        {' '}
+                        <button
+                          type="button"
+                          onClick={() => setBookingMode(modeComparison.best.mode)}
+                          className="text-accent underline underline-offset-2 hover:text-white transition-colors"
+                        >
+                          Przełącz na ten tryb
+                        </button>
+                      </>
+                    )}
+                  </div>
+                )}
                 
                 <button className="w-full bg-accent hover:bg-accent-hover text-black font-bold py-4 rounded text-sm tracking-widest uppercase transition-colors flex justify-center items-center gap-2 mt-2 cursor-pointer">
-                  Rezerwuj Transfer
+                  Wyceń Transfer
                 </button>
+                <p className="text-[10px] text-text-muted text-center leading-relaxed">
+                  To nie jest automatyczna rezerwacja — potwierdzamy dostępność, termin i realność przejazdu (np. przy krótkim czasie i długiej trasie) po kontakcie.
+                </p>
               </motion.div>
             ) : (
               <button
@@ -607,7 +656,7 @@ export default function App() {
             )}
 
             <div className="text-center text-[10px] text-text-muted mt-2 tracking-wide leading-relaxed">
-              {BRAND_NAME} — przewóz z przewoźnikiem w cenie • Wycena orientacyjna • Potwierdzenie po kontakcie
+              {BRAND_NAME} • Wycena orientacyjna • Potwierdzenie po kontakcie
             </div>
           </div>
         </div>
@@ -685,7 +734,7 @@ export default function App() {
               </div>
               <h3 className="text-lg font-bold uppercase tracking-widest mb-4">Nasza Flota</h3>
               <p className="text-text-muted text-sm leading-relaxed">
-                Dobieramy auta pod charakter przejazdu: reprezentacyjną S-Klasę oraz charakterystyczną G-Klasę — zawsze w zestawie z doświadczonym kierowcą i pełną obsługą po stronie przewoźnika, tak abyś mógł skupić się na celu podróży, a nie na logistyce.
+                Dobieramy auta pod charakter przejazdu: przestronną V-Klasę oraz charakterystyczną G-Klasę AMG — zawsze w zestawie z doświadczonym kierowcą i pełną obsługą po stronie przewoźnika, tak abyś mógł skupić się na celu podróży, a nie na logistyce.
               </p>
             </div>
           </div>
@@ -699,9 +748,6 @@ export default function App() {
             <div>
               <span className="text-accent uppercase tracking-[4px] text-xs font-medium mb-3 block">Doświadczenia</span>
               <h2 className="font-display text-3xl lg:text-4xl">Co Mówią Nasi Klienci</h2>
-              <p className="text-text-muted text-sm mt-3 max-w-xl leading-relaxed">
-                Poniżej opinie osób, które skorzystały z przewozów {BRAND_DISPLAY}. Wspólny mianownik: przejrzysta współpraca z przewoźnikiem i spokój, że cała usługa — włącznie z kierowcą — była jasno ujęta w ofercie.
-              </p>
             </div>
             <div className="flex gap-1">
               {[...Array(5)].map((_, i) => (
