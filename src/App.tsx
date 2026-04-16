@@ -11,27 +11,61 @@ const CONTACT_PHONE_TEL = '+48600479905';
 /** Podmień na docelowy adres e-mail. */
 const CONTACT_EMAIL = 'kontakt@viptransferbialystok.pl';
 
-const cars = [
+type FleetCar = {
+  id: 'v-class' | 'g-class';
+  name: string;
+  specLines: [string, string];
+  seats: string;
+  luggage: string;
+  imageUrl: string;
+  pricing: {
+    transferBase: number;
+    hourlyFirst: number;
+    hourlyExtraPerHour: number;
+    fullday: number;
+    fulldayIncludedKm: number;
+    fulldayExtraPerKm: number;
+  };
+};
+
+const cars: FleetCar[] = [
   {
     id: 'v-class',
-    name: 'Mercedes-Benz V-Klasa',
-    modelLine: '300 d 4MATIC · 2025',
-    specHint: '2.0L diesel · ok. 237 KM',
+    name: 'Mercedes-Benz Klasa V 300 d 4-MATIC 9G-TRONIC',
+    specLines: [
+      '2.0L diesel (OM 654) · 237 KM',
+      'Napęd 4MATIC · skrzynia 9G-TRONIC'
+    ],
     seats: 'do 5 pasażerów (+ kierowca)',
     luggage: 'Duża przestrzeń bagażowa',
-    basePrice: 2000,
     imageUrl: vClassImage,
-    imageClassName: 'scale-[1.02]'
+    pricing: {
+      transferBase: 1000,
+      hourlyFirst: 1000,
+      hourlyExtraPerHour: 250,
+      fullday: 2500,
+      fulldayIncludedKm: 250,
+      fulldayExtraPerKm: 12
+    }
   },
   {
     id: 'g-class',
-    name: 'Mercedes-AMG G 63',
-    specHint: 'V8 biturbo · ok. 585 KM',
+    name: 'Mercedes-Benz Klasa G 63 AMG',
+    specLines: [
+      'V8 biturbo 4.0L (benzyna) · 585 KM',
+      '850 Nm · przyspieszenie 0–100 km/h ~4,5 s'
+    ],
     seats: '3-4 Pasażerów',
     luggage: '4 Duże Walizki',
-    basePrice: 2000,
     imageUrl: gClassImage,
-    imageClassName: 'scale-[1.02]'
+    pricing: {
+      transferBase: 2000,
+      hourlyFirst: 1400,
+      hourlyExtraPerHour: 300,
+      fullday: 3500,
+      fulldayIncludedKm: 250,
+      fulldayExtraPerKm: 12
+    }
   }
 ];
 
@@ -255,8 +289,10 @@ export default function App() {
   let distCost = 0;
   let baseCost = 0;
 
+  const p = bookingCar.pricing;
+
   if (bookingMode === 'transfer') {
-    baseCost = bookingCar.basePrice;
+    baseCost = p.transferBase;
     baseText = `Opłata bazowa (${bookingCar.name})`;
     extraDist = distance ? Math.max(0, distance - 150) : 0;
     distCost = extraDist * 10;
@@ -264,13 +300,12 @@ export default function App() {
     total = baseCost + distCost;
   } else if (bookingMode === 'hourly') {
     const h = Math.max(1, hours);
-    const firstHour = 1400;
     const extraHours = Math.max(0, h - 1);
-    baseCost = firstHour + extraHours * 300;
+    baseCost = p.hourlyFirst + extraHours * p.hourlyExtraPerHour;
     baseText =
       h === 1
-        ? `Wynajem na godziny (1h — ${firstHour} PLN)`
-        : `Wynajem na godziny (${h}h — ${firstHour} PLN + ${extraHours}×300 PLN)`;
+        ? `Wynajem na godziny (1h — ${p.hourlyFirst} PLN)`
+        : `Wynajem na godziny (${h}h — ${p.hourlyFirst} PLN + ${extraHours}×${p.hourlyExtraPerHour} PLN)`;
     const includedKm = h * 20;
     extraDist = distance != null ? Math.max(0, distance - includedKm) : 0;
     distCost = extraDist * 10;
@@ -279,13 +314,13 @@ export default function App() {
     }
     total = baseCost + distCost + (weddingPackage ? 600 : 0);
   } else if (bookingMode === 'fullday') {
-    const includedKmFullDay = 250;
-    baseCost = 3500;
+    const includedKmFullDay = p.fulldayIncludedKm;
+    baseCost = p.fullday;
     baseText = `Pakiet całodniowy (8h, do ${includedKmFullDay} km w cenie)`;
     extraDist = distance != null ? Math.max(0, distance - includedKmFullDay) : 0;
-    distCost = extraDist * 12;
+    distCost = extraDist * p.fulldayExtraPerKm;
     if (extraDist > 0) {
-      distanceText = `Dopłata za km powyżej ${includedKmFullDay} km (${extraDist} km × 12 PLN)`;
+      distanceText = `Dopłata za km powyżej ${includedKmFullDay} km (${extraDist} km × ${p.fulldayExtraPerKm} PLN)`;
     }
     total = baseCost + distCost + (weddingPackage ? 600 : 0);
   }
@@ -294,13 +329,17 @@ export default function App() {
     const d = distance;
     const hh = Math.max(1, hours);
     const wAdd = weddingPackage ? 600 : 0;
-    const transferTotal = bookingCar.basePrice + (d ? Math.max(0, d - 150) * 10 : 0);
+    const pr = bookingCar.pricing;
+    const transferTotal = pr.transferBase + (d ? Math.max(0, d - 150) * 10 : 0);
     const hourlyTotal =
-      1400 +
-      Math.max(0, hh - 1) * 300 +
+      pr.hourlyFirst +
+      Math.max(0, hh - 1) * pr.hourlyExtraPerHour +
       (d != null ? Math.max(0, d - hh * 20) * 10 : 0) +
       wAdd;
-    const fulldayTotal = 3500 + (d != null ? Math.max(0, d - 250) * 12 : 0) + wAdd;
+    const fulldayTotal =
+      pr.fullday +
+      (d != null ? Math.max(0, d - pr.fulldayIncludedKm) * pr.fulldayExtraPerKm : 0) +
+      wAdd;
     const items: { mode: BookingMode; label: string; total: number }[] = [
       { mode: 'transfer', label: 'Transfer', total: transferTotal },
       { mode: 'hourly', label: 'Na godziny', total: hourlyTotal },
@@ -308,7 +347,7 @@ export default function App() {
     ];
     const best = items.reduce((a, b) => (a.total <= b.total ? a : b));
     return { items, best };
-  }, [bookingCar.basePrice, distance, hours, weddingPackage]);
+  }, [bookingCar, distance, hours, weddingPackage]);
 
   return (
     <div className="w-full flex flex-col bg-bg text-text-main font-sans overflow-x-hidden">
@@ -340,19 +379,19 @@ export default function App() {
                 className="flex flex-col h-full"
               >
                 <div className="mb-7 lg:mb-8">
-                  <h1 className="font-display text-4xl sm:text-5xl lg:text-[62px] xl:text-[76px] leading-[1.02] tracking-tight">
+                  <h1 className="font-display text-2xl sm:text-3xl md:text-4xl lg:text-[52px] xl:text-[60px] leading-[1.08] tracking-tight">
                     {car.name}
                   </h1>
-                  {'modelLine' in car && car.modelLine && (
-                    <p className="text-sm sm:text-base font-medium text-white/75 mt-3 tracking-wide">
-                      {car.modelLine}
-                    </p>
-                  )}
-                  {'specHint' in car && car.specHint && (
-                    <p className="text-[10px] sm:text-[11px] text-text-muted/80 mt-2 tracking-[0.08em] uppercase">
-                      {car.specHint}
-                    </p>
-                  )}
+                  <div className="mt-4 sm:mt-5 rounded-xl border border-accent/25 bg-gradient-to-br from-white/[0.06] to-transparent px-4 py-3.5 sm:px-5 sm:py-4 space-y-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
+                    {car.specLines.map((line) => (
+                      <p
+                        key={line}
+                        className="text-sm sm:text-base font-semibold tracking-wide text-white leading-snug border-l-2 border-accent/70 pl-3 -ml-0.5"
+                      >
+                        {line}
+                      </p>
+                    ))}
+                  </div>
                 </div>
                 
                 <div className="flex flex-wrap gap-8 lg:gap-12 mb-6 lg:mb-7">
@@ -366,19 +405,20 @@ export default function App() {
                   </div>
                   <div className="flex flex-col gap-1.5">
                     <span className="text-[10px] lg:text-xs text-text-muted uppercase tracking-[1px] font-bold">Baza</span>
-                    <span className="text-sm lg:text-base font-medium text-accent">od {car.basePrice} PLN</span>
+                    <span className="text-sm lg:text-base font-medium text-accent">od {car.pricing.transferBase} PLN</span>
                   </div>
                 </div>
                 <p className="text-[12px] lg:text-sm text-text-muted leading-relaxed max-w-2xl mb-8 lg:mb-9 border-l-2 border-accent/40 pl-4">
                   <span className="text-white/90 font-medium">{BRAND_DISPLAY}</span> oferuje przewozy pasażerskie w modelu z pełną obsługą przewoźnika, zgłoszenie przewozu oraz standardy bezpieczeństwa są uwzględnione w ramach usługi.
                 </p>
 
-                {/* Car Image Wrapper */}
-                <div className="w-full h-[320px] sm:h-[390px] lg:h-[480px] xl:h-[520px] relative flex items-center justify-center mb-7 lg:mb-8 overflow-visible">
-                  {/* Decorative glow behind the car */}
-                  <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(212,175,55,0.18)_0%,_rgba(212,175,55,0.06)_35%,_transparent_74%)] z-0"></div>
-                  <div className="absolute bottom-3 left-1/2 -translate-x-1/2 w-[70%] h-8 bg-black/45 blur-xl rounded-full z-0"></div>
-
+                {/* Car Image Wrapper — jednolite tło, kontrolowany blask, bez „czarnych ram” przy PNG */}
+                <div className="w-full min-h-[320px] sm:min-h-[390px] lg:min-h-[480px] xl:min-h-[520px] relative mb-7 lg:mb-8 rounded-2xl overflow-hidden bg-bg isolate border border-white/[0.06]">
+                  <div
+                    className="absolute inset-0 pointer-events-none z-0 bg-[radial-gradient(ellipse_48%_40%_at_50%_56%,rgba(212,175,55,0.11),transparent_68%)]"
+                    aria-hidden
+                  />
+                  <div className="relative z-10 flex min-h-[320px] sm:min-h-[390px] lg:min-h-[480px] xl:min-h-[520px] w-full items-center justify-center px-5 py-8 sm:px-8 sm:py-10">
                   {!imageErrors[car.id] ? (
                     <motion.img
                       key={`img-${carIndex}`}
@@ -389,7 +429,7 @@ export default function App() {
                       src={car.imageUrl}
                       alt={car.name}
                       onError={() => handleImageError(car.id)}
-                      className={`relative z-10 h-full w-full max-h-full object-contain object-center drop-shadow-[0_24px_35px_rgba(0,0,0,0.72)] ${car.imageClassName || ''}`}
+                      className="relative z-10 max-h-[min(520px,88vh)] w-auto max-w-full object-contain object-center [filter:drop-shadow(0_18px_32px_rgba(0,0,0,0.42))]"
                     />
                   ) : (
                     <div className="w-full h-full bg-gradient-to-r from-transparent via-[rgba(212,175,55,0.05)] to-transparent rounded border border-dashed border-[#333] relative flex items-center justify-center overflow-hidden z-10">
@@ -399,6 +439,7 @@ export default function App() {
                       </div>
                     </div>
                   )}
+                  </div>
 
                   <button
                     onClick={prevCar}
@@ -524,7 +565,7 @@ export default function App() {
                   className="w-full bg-transparent border-b border-[#333] pb-2 text-sm text-white focus:outline-none focus:border-accent transition-colors"
                 />
                 <p className="text-[11px] text-text-muted leading-relaxed">
-                  Cennik: 1. godz. 1400 PLN, każda kolejna +300 PLN. W cenie {Math.max(1, hours) * 20} km łącznie (20 km na każdą godzinę). Powyżej limitu: +10 PLN za km — podaj trasę w polu „Cel”, aby policzyć dystans.
+                  Cennik ({bookingCar.id === 'v-class' ? 'V' : 'G'}): 1. godz. {bookingCar.pricing.hourlyFirst} PLN, każda kolejna +{bookingCar.pricing.hourlyExtraPerHour} PLN. W cenie {Math.max(1, hours) * 20} km łącznie (20 km na każdą godzinę). Powyżej limitu: +10 PLN za km — podaj trasę w polu „Cel”, aby policzyć dystans.
                 </p>
               </div>
             )}
@@ -570,7 +611,7 @@ export default function App() {
                   {bookingMode === 'fullday' && (
                     <div className="flex justify-between items-center gap-4">
                       <span>Limit km w cenie (pakiet całodniowy):</span>
-                      <span className="text-white font-medium shrink-0">250 km</span>
+                      <span className="text-white font-medium shrink-0">{bookingCar.pricing.fulldayIncludedKm} km</span>
                     </div>
                   )}
                   {((bookingMode === 'hourly' || bookingMode === 'fullday') && distance !== null && distance > 0) && (
@@ -614,7 +655,7 @@ export default function App() {
                 {isCalculated && distance !== null && distance > 0 && (
                   <div className="rounded border border-[#2a2a2a] bg-[#141414] px-3 py-2.5 text-[10px] text-text-muted leading-relaxed">
                     <span className="text-white/90">Porównanie trybów przy tej trasie</span> (to samo auto, te same km i opcje): najniższa orientacyjna kwota wychodzi w trybie „
-                    <span className="text-accent font-medium">{modeComparison.best.label}</span>” — ok.{' '}
+                    <span className="text-accent font-medium">{modeComparison.best.label}</span>” — około{' '}
                     <span className="text-white font-medium">{modeComparison.best.total} PLN</span>.
                     {bookingMode !== modeComparison.best.mode && (
                       <>
