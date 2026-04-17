@@ -92,6 +92,38 @@ const testimonials = [
 
 type BookingMode = 'transfer' | 'hourly' | 'fullday';
 
+type SlideDir = 'next' | 'prev';
+
+const heroCopyVariants = {
+  initial: { opacity: 0, y: -36 },
+  animate: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.34, ease: [0.22, 1, 0.36, 1] as const }
+  },
+  exit: {
+    opacity: 0,
+    transition: { duration: 0.14, ease: 'easeIn' as const }
+  }
+};
+
+const heroImageVariants = {
+  initial: (dir: SlideDir) => ({
+    x: dir === 'next' ? '78%' : '-78%',
+    opacity: 0.35
+  }),
+  animate: {
+    x: 0,
+    opacity: 1,
+    transition: { duration: 0.22, ease: [0.32, 0, 0.15, 1] as const }
+  },
+  exit: (dir: SlideDir) => ({
+    x: dir === 'next' ? '-78%' : '78%',
+    opacity: 0.35,
+    transition: { duration: 0.2, ease: [0.32, 0, 0.15, 1] as const }
+  })
+};
+
 interface AddressInputProps {
   label: string;
   value: string;
@@ -271,8 +303,16 @@ export default function App() {
     }
   };
 
-  const nextCar = () => setCarIndex((prev) => (prev + 1) % cars.length);
-  const prevCar = () => setCarIndex((prev) => (prev - 1 + cars.length) % cars.length);
+  const [slideDir, setSlideDir] = useState<SlideDir>('next');
+
+  const nextCar = () => {
+    setSlideDir('next');
+    setCarIndex((prev) => (prev + 1) % cars.length);
+  };
+  const prevCar = () => {
+    setSlideDir('prev');
+    setCarIndex((prev) => (prev - 1 + cars.length) % cars.length);
+  };
 
   const handleImageError = (id: string) => {
     setImageErrors(prev => ({ ...prev, [id]: true }));
@@ -367,16 +407,16 @@ export default function App() {
         {/* Showcase Section */}
         <div className="relative p-8 lg:p-12 xl:p-14 flex flex-col justify-center border-r border-border overflow-hidden bg-bg min-h-[640px]">
 
-          {/* Car Info */}
-          <div className="relative z-10 max-w-5xl w-full mx-auto lg:mx-0">
+          {/* Car Info — tekst: znikanie, potem wejście z góry; zdjęcie: szybki swipe poziomy */}
+          <div className="relative z-10 max-w-5xl w-full mx-auto lg:mx-0 flex flex-col">
             <AnimatePresence mode="wait">
               <motion.div
-                key={`info-${carIndex}`}
-                initial={{ opacity: 0, x: 30 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -30 }}
-                transition={{ duration: 0.4, ease: "easeOut" }}
-                className="flex flex-col h-full"
+                key={`hero-copy-${carIndex}`}
+                variants={heroCopyVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                className="flex flex-col"
               >
                 <div className="mb-7 lg:mb-8">
                   <h1 className="font-display text-2xl sm:text-3xl md:text-4xl lg:text-[52px] xl:text-[60px] leading-[1.08] tracking-tight">
@@ -393,7 +433,7 @@ export default function App() {
                     ))}
                   </div>
                 </div>
-                
+
                 <div className="flex flex-wrap gap-8 lg:gap-12 mb-6 lg:mb-7">
                   <div className="flex flex-col gap-1.5">
                     <span className="text-[10px] lg:text-xs text-text-muted uppercase tracking-[1px] font-bold">Miejsca</span>
@@ -415,70 +455,80 @@ export default function App() {
                 <p className="text-[12px] lg:text-sm text-text-muted leading-relaxed max-w-2xl mb-8 lg:mb-9 border-l-2 border-accent/40 pl-4">
                   <span className="text-white/90 font-medium">{BRAND_DISPLAY}</span> oferuje przewozy pasażerskie w modelu z pełną obsługą przewoźnika, zgłoszenie przewozu oraz standardy bezpieczeństwa są uwzględnione w ramach usługi.
                 </p>
-
-                {/* Karuzela: bez obramowania przy zdjęciu — tylko tło i blask; strzałki na zewnątrz overflow */}
-                <div className="relative w-full mb-7 lg:mb-8">
-                  <div className="relative w-full min-h-[320px] sm:min-h-[390px] lg:min-h-[480px] xl:min-h-[520px] overflow-hidden bg-bg isolate">
-                    <div
-                      className="absolute inset-0 pointer-events-none z-0 bg-[radial-gradient(ellipse_48%_40%_at_50%_56%,rgba(212,175,55,0.11),transparent_68%)]"
-                      aria-hidden
-                    />
-                    <div className="relative z-10 flex min-h-[320px] sm:min-h-[390px] lg:min-h-[480px] xl:min-h-[520px] w-full items-center justify-center px-[4.5rem] py-8 sm:px-24 sm:py-10 lg:px-28 lg:py-12">
-                  {!imageErrors[car.id] ? (
-                    <motion.img
-                      key={`img-${carIndex}`}
-                      initial={{ opacity: 0, x: 50, scale: 0.95 }}
-                      animate={{ opacity: 1, x: 0, scale: 1 }}
-                      exit={{ opacity: 0, x: -50, scale: 0.95 }}
-                      transition={{ duration: 0.5, ease: "easeOut" }}
-                      src={car.imageUrl}
-                      alt={car.name}
-                      onError={() => handleImageError(car.id)}
-                      className="relative z-10 max-h-[min(520px,88vh)] w-auto max-w-full object-contain object-center [filter:drop-shadow(0_18px_32px_rgba(0,0,0,0.42))]"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-r from-transparent via-[rgba(212,175,55,0.05)] to-transparent rounded border border-dashed border-[#333] relative flex items-center justify-center overflow-hidden z-10">
-                      <div className="text-center text-text-muted relative z-10">
-                        <div className="text-3xl lg:text-5xl font-display mb-2 text-white/80">{car.name}</div>
-                        <div className="text-[10px] lg:text-xs tracking-[3px] uppercase">Wizualizacja niedostępna</div>
-                      </div>
-                    </div>
-                  )}
-                    </div>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={prevCar}
-                    aria-label="Poprzedni samochód"
-                    className="absolute left-0 sm:left-1 top-1/2 -translate-y-1/2 z-20 flex h-16 w-16 sm:h-[72px] sm:w-[72px] lg:h-20 lg:w-20 items-center justify-center rounded-full border border-border/50 bg-bg/90 text-white shadow-[0_12px_36px_rgba(0,0,0,0.45)] backdrop-blur-md transition-all duration-300 hover:border-accent/55 hover:bg-bg/95 hover:shadow-[0_14px_40px_rgba(212,175,55,0.14)] cursor-pointer group"
-                  >
-                    <ChevronLeft className="h-9 w-9 sm:h-10 sm:w-10 lg:h-11 lg:w-11 text-white/95 group-hover:text-accent transition-colors" strokeWidth={2.5} />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={nextCar}
-                    aria-label="Następny samochód"
-                    className="absolute right-0 sm:right-1 top-1/2 -translate-y-1/2 z-20 flex h-16 w-16 sm:h-[72px] sm:w-[72px] lg:h-20 lg:w-20 items-center justify-center rounded-full border border-border/50 bg-bg/90 text-white shadow-[0_12px_36px_rgba(0,0,0,0.45)] backdrop-blur-md transition-all duration-300 hover:border-accent/55 hover:bg-bg/95 hover:shadow-[0_14px_40px_rgba(212,175,55,0.14)] cursor-pointer group"
-                  >
-                    <ChevronRight className="h-9 w-9 sm:h-10 sm:w-10 lg:h-11 lg:w-11 text-white/95 group-hover:text-accent transition-colors" strokeWidth={2.5} />
-                  </button>
-                </div>
-
-                <div className="flex items-center justify-center gap-3 mt-2 lg:mt-3">
-                  {cars.map((fleetCar, idx) => (
-                    <button
-                      key={fleetCar.id}
-                      onClick={() => setCarIndex(idx)}
-                      aria-label={`Pokaż ${fleetCar.name}`}
-                      className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
-                        idx === carIndex ? 'w-12 bg-accent' : 'w-6 bg-[#2a2a2a] hover:bg-[#3a3a3a]'
-                      }`}
-                    />
-                  ))}
-                </div>
               </motion.div>
             </AnimatePresence>
+
+            {/* Karuzela zdjęć: szybki swipe w kierunku slajdu (next = z prawej do lewej) */}
+            <div className="relative w-full mb-7 lg:mb-8">
+              <div className="relative w-full min-h-[320px] sm:min-h-[390px] lg:min-h-[480px] xl:min-h-[520px] overflow-hidden bg-bg isolate">
+                <div
+                  className="absolute inset-0 pointer-events-none z-0 bg-[radial-gradient(ellipse_48%_40%_at_50%_56%,rgba(212,175,55,0.11),transparent_68%)]"
+                  aria-hidden
+                />
+                <AnimatePresence mode="wait" custom={slideDir}>
+                  <motion.div
+                    key={`hero-img-${carIndex}`}
+                    custom={slideDir}
+                    variants={heroImageVariants}
+                    initial="initial"
+                    animate="animate"
+                    exit="exit"
+                    className="absolute inset-0 z-10 flex items-center justify-center px-[4.5rem] py-8 sm:px-24 sm:py-10 lg:px-28 lg:py-12"
+                  >
+                    {!imageErrors[car.id] ? (
+                      <img
+                        src={car.imageUrl}
+                        alt={car.name}
+                        onError={() => handleImageError(car.id)}
+                        className="relative z-10 max-h-[min(520px,88vh)] w-auto max-w-full object-contain object-center [filter:drop-shadow(0_18px_32px_rgba(0,0,0,0.42))]"
+                      />
+                    ) : (
+                      <div className="w-full max-w-lg bg-gradient-to-r from-transparent via-[rgba(212,175,55,0.05)] to-transparent rounded border border-dashed border-[#333] relative flex items-center justify-center overflow-hidden z-10 min-h-[200px]">
+                        <div className="text-center text-text-muted relative z-10 px-4">
+                          <div className="text-3xl lg:text-5xl font-display mb-2 text-white/80">{car.name}</div>
+                          <div className="text-[10px] lg:text-xs tracking-[3px] uppercase">Wizualizacja niedostępna</div>
+                        </div>
+                      </div>
+                    )}
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+
+              <button
+                type="button"
+                onClick={prevCar}
+                aria-label="Poprzedni samochód"
+                className="absolute left-0 sm:left-1 top-1/2 -translate-y-1/2 z-20 flex h-16 w-16 sm:h-[72px] sm:w-[72px] lg:h-20 lg:w-20 items-center justify-center rounded-full border border-border/50 bg-bg/90 text-white shadow-[0_12px_36px_rgba(0,0,0,0.45)] backdrop-blur-md transition-all duration-300 hover:border-accent/55 hover:bg-bg/95 hover:shadow-[0_14px_40px_rgba(212,175,55,0.14)] cursor-pointer group"
+              >
+                <ChevronLeft className="h-9 w-9 sm:h-10 sm:w-10 lg:h-11 lg:w-11 text-white/95 group-hover:text-accent transition-colors" strokeWidth={2.5} />
+              </button>
+              <button
+                type="button"
+                onClick={nextCar}
+                aria-label="Następny samochód"
+                className="absolute right-0 sm:right-1 top-1/2 -translate-y-1/2 z-20 flex h-16 w-16 sm:h-[72px] sm:w-[72px] lg:h-20 lg:w-20 items-center justify-center rounded-full border border-border/50 bg-bg/90 text-white shadow-[0_12px_36px_rgba(0,0,0,0.45)] backdrop-blur-md transition-all duration-300 hover:border-accent/55 hover:bg-bg/95 hover:shadow-[0_14px_40px_rgba(212,175,55,0.14)] cursor-pointer group"
+              >
+                <ChevronRight className="h-9 w-9 sm:h-10 sm:w-10 lg:h-11 lg:w-11 text-white/95 group-hover:text-accent transition-colors" strokeWidth={2.5} />
+              </button>
+            </div>
+
+            <div className="flex items-center justify-center gap-3 mt-2 lg:mt-3">
+              {cars.map((fleetCar, idx) => (
+                <button
+                  key={fleetCar.id}
+                  type="button"
+                  onClick={() => {
+                    if (idx === carIndex) return;
+                    setSlideDir(idx > carIndex ? 'next' : 'prev');
+                    setCarIndex(idx);
+                  }}
+                  aria-label={`Pokaż ${fleetCar.name}`}
+                  className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
+                    idx === carIndex ? 'w-12 bg-accent' : 'w-6 bg-[#2a2a2a] hover:bg-[#3a3a3a]'
+                  }`}
+                />
+              ))}
+            </div>
           </div>
         </div>
 
