@@ -36,7 +36,7 @@ const cars: FleetCar[] = [
       '2.0L diesel (OM 654) · 237 KM',
       'Napęd 4MATIC · skrzynia 9G-TRONIC'
     ],
-    seats: 'do 5 pasażerów (+ kierowca)',
+    seats: 'do 5 pasażerów',
     luggage: 'Duża przestrzeń bagażowa',
     imageUrl: vClassImage,
     pricing: {
@@ -72,25 +72,57 @@ const cars: FleetCar[] = [
 const testimonials = [
   {
     id: 1,
-    text: "Profesjonalny, licencjonowany przewóz — w cenie był kierowca i pełna obsługa przewoźnika, bez żadnych niespodzianek. Auto w idealnym stanie, punktualność na najwyższym poziomie. Polecam VipTransferBiałystok każdemu, kto ceni spokój i przejrzyste zasady.",
-    author: "Michał K.",
+    text: 'Profesjonalny, licencjonowany przewóz - pełna obsługa przewoźnika, bez żadnych niespodzianek. Auto w idealnym stanie. Polecam :)',
+    author: 'Michał K.',
     rating: 5
   },
   {
     id: 2,
-    text: "Zleciliśmy całodniowy przejazd dla zarządu. W wycenie od razu było widać, że usługa przewoźnika jest wliczona — dyskretny kierowca, auto reprezentacyjne, zero chaosu przy rozliczeniu. Firma godna zaufania.",
-    author: "Anna W.",
+    text: 'Bardzo miły kierowca, auto reprezentacyjne, zero chaosu przy rozliczeniu. Firma godna zaufania, polecam!!!',
+    author: 'Anna W.',
     rating: 5
   },
   {
     id: 3,
-    text: "G-Klasa na ślub z pakietem dekoracji — goście byli zachwyceni, a my mieliśmy pewność, że przewóz jest realizowany przez przewoźnika z odpowiednimi uprawnieniami. Całość na najwyższym poziomie.",
-    author: "Karolina",
+    text: 'Wynajęliśmy G klasę na ślub z pakietem dekoracji, goście byli zachwyceni, a my mieliśmy pewność, że przewóz był realizowany przez bardzo życzliwego kierowcę. Całość na najwyższym poziomie. Bardzo dziękujemy!',
+    author: 'Karolina',
     rating: 5
   }
 ];
 
 type BookingMode = 'transfer' | 'hourly' | 'fullday';
+
+type SlideDir = 'next' | 'prev';
+
+const heroCopyVariants = {
+  initial: { opacity: 0, y: -36 },
+  animate: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.34, ease: [0.22, 1, 0.36, 1] as const }
+  },
+  exit: {
+    opacity: 0,
+    transition: { duration: 0.14, ease: 'easeIn' as const }
+  }
+};
+
+const heroImageVariants = {
+  initial: (dir: SlideDir) => ({
+    x: dir === 'next' ? '78%' : '-78%',
+    opacity: 0.35
+  }),
+  animate: {
+    x: 0,
+    opacity: 1,
+    transition: { duration: 0.22, ease: [0.32, 0, 0.15, 1] as const }
+  },
+  exit: (dir: SlideDir) => ({
+    x: dir === 'next' ? '-78%' : '78%',
+    opacity: 0.35,
+    transition: { duration: 0.2, ease: [0.32, 0, 0.15, 1] as const }
+  })
+};
 
 interface AddressInputProps {
   label: string;
@@ -271,8 +303,16 @@ export default function App() {
     }
   };
 
-  const nextCar = () => setCarIndex((prev) => (prev + 1) % cars.length);
-  const prevCar = () => setCarIndex((prev) => (prev - 1 + cars.length) % cars.length);
+  const [slideDir, setSlideDir] = useState<SlideDir>('next');
+
+  const nextCar = () => {
+    setSlideDir('next');
+    setCarIndex((prev) => (prev + 1) % cars.length);
+  };
+  const prevCar = () => {
+    setSlideDir('prev');
+    setCarIndex((prev) => (prev - 1 + cars.length) % cars.length);
+  };
 
   const handleImageError = (id: string) => {
     setImageErrors(prev => ({ ...prev, [id]: true }));
@@ -361,22 +401,24 @@ export default function App() {
         </div>
       </header>
 
-      {/* Hero Section (Carousel + Booking) */}
-      <section className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_440px] xl:grid-cols-[minmax(0,1fr)_500px] min-h-[calc(100vh-90px)] relative">
+      {/* Hero Section — items-start: kolumny nie rozciągają się do wspólnej wysokości; brak justify-center = brak „przeskakiwania” przy zmianie auta */}
+      <section className="grid grid-cols-1 items-start lg:grid-cols-[minmax(0,1fr)_440px] xl:grid-cols-[minmax(0,1fr)_500px] min-h-[calc(100vh-90px)] relative">
         
-        {/* Showcase Section */}
-        <div className="relative p-8 lg:p-12 xl:p-14 flex flex-col justify-center border-r border-border overflow-hidden bg-bg min-h-[640px]">
+        {/* Showcase Section — treść od góry (bez pionowego centrowania całości przy zmianie wysokości) */}
+        <div className="relative p-8 lg:p-12 xl:p-14 flex flex-col justify-start border-r border-border overflow-hidden bg-bg min-h-[640px] lg:min-h-[calc(100vh-90px)]">
 
-          {/* Car Info */}
-          <div className="relative z-10 max-w-5xl w-full mx-auto lg:mx-0">
+          {/* Car Info — tekst: znikanie, potem wejście z góry; zdjęcie: szybki swipe poziomy */}
+          <div className="relative z-10 max-w-5xl w-full mx-auto lg:mx-0 flex flex-col">
+            {/* Stała min-wysokość: przy AnimatePresence mode="wait" między exit a enter nie zapada się layout (strzałki / panel wyceny bez skoków) */}
+            <div className="min-h-[300px] sm:min-h-[320px] lg:min-h-[340px] xl:min-h-[380px] shrink-0">
             <AnimatePresence mode="wait">
               <motion.div
-                key={`info-${carIndex}`}
-                initial={{ opacity: 0, x: 30 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -30 }}
-                transition={{ duration: 0.4, ease: "easeOut" }}
-                className="flex flex-col h-full"
+                key={`hero-copy-${carIndex}`}
+                variants={heroCopyVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                className="flex flex-col"
               >
                 <div className="mb-7 lg:mb-8">
                   <h1 className="font-display text-2xl sm:text-3xl md:text-4xl lg:text-[52px] xl:text-[60px] leading-[1.08] tracking-tight">
@@ -393,7 +435,7 @@ export default function App() {
                     ))}
                   </div>
                 </div>
-                
+
                 <div className="flex flex-wrap gap-8 lg:gap-12 mb-6 lg:mb-7">
                   <div className="flex flex-col gap-1.5">
                     <span className="text-[10px] lg:text-xs text-text-muted uppercase tracking-[1px] font-bold">Miejsca</span>
@@ -404,9 +446,7 @@ export default function App() {
                     <span className="text-sm lg:text-base font-medium">{car.luggage}</span>
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <span className="text-[10px] lg:text-xs text-text-muted uppercase tracking-[1px] font-bold">
-                      {car.id === 'g-class' ? 'Baza (1. godz.)' : 'Baza'}
-                    </span>
+                    <span className="text-[10px] lg:text-xs text-text-muted uppercase tracking-[1px] font-bold">Baza</span>
                     <span className="text-sm lg:text-base font-medium text-accent">
                       od {car.id === 'g-class' ? car.pricing.hourlyFirst : car.pricing.transferBase} PLN
                     </span>
@@ -415,70 +455,86 @@ export default function App() {
                 <p className="text-[12px] lg:text-sm text-text-muted leading-relaxed max-w-2xl mb-8 lg:mb-9 border-l-2 border-accent/40 pl-4">
                   <span className="text-white/90 font-medium">{BRAND_DISPLAY}</span> oferuje przewozy pasażerskie w modelu z pełną obsługą przewoźnika, zgłoszenie przewozu oraz standardy bezpieczeństwa są uwzględnione w ramach usługi.
                 </p>
-
-                {/* Karuzela: bez obramowania przy zdjęciu — tylko tło i blask; strzałki na zewnątrz overflow */}
-                <div className="relative w-full mb-7 lg:mb-8">
-                  <div className="relative w-full min-h-[320px] sm:min-h-[390px] lg:min-h-[480px] xl:min-h-[520px] overflow-hidden bg-bg isolate">
-                    <div
-                      className="absolute inset-0 pointer-events-none z-0 bg-[radial-gradient(ellipse_48%_40%_at_50%_56%,rgba(212,175,55,0.11),transparent_68%)]"
-                      aria-hidden
-                    />
-                    <div className="relative z-10 flex min-h-[320px] sm:min-h-[390px] lg:min-h-[480px] xl:min-h-[520px] w-full items-center justify-center px-[4.5rem] py-8 sm:px-24 sm:py-10 lg:px-28 lg:py-12">
-                  {!imageErrors[car.id] ? (
-                    <motion.img
-                      key={`img-${carIndex}`}
-                      initial={{ opacity: 0, x: 50, scale: 0.95 }}
-                      animate={{ opacity: 1, x: 0, scale: 1 }}
-                      exit={{ opacity: 0, x: -50, scale: 0.95 }}
-                      transition={{ duration: 0.5, ease: "easeOut" }}
-                      src={car.imageUrl}
-                      alt={car.name}
-                      onError={() => handleImageError(car.id)}
-                      className="relative z-10 max-h-[min(520px,88vh)] w-auto max-w-full object-contain object-center [filter:drop-shadow(0_18px_32px_rgba(0,0,0,0.42))]"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-r from-transparent via-[rgba(212,175,55,0.05)] to-transparent rounded border border-dashed border-[#333] relative flex items-center justify-center overflow-hidden z-10">
-                      <div className="text-center text-text-muted relative z-10">
-                        <div className="text-3xl lg:text-5xl font-display mb-2 text-white/80">{car.name}</div>
-                        <div className="text-[10px] lg:text-xs tracking-[3px] uppercase">Wizualizacja niedostępna</div>
-                      </div>
-                    </div>
-                  )}
-                    </div>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={prevCar}
-                    aria-label="Poprzedni samochód"
-                    className="absolute left-0 sm:left-1 top-1/2 -translate-y-1/2 z-20 flex h-16 w-16 sm:h-[72px] sm:w-[72px] lg:h-20 lg:w-20 items-center justify-center rounded-full border border-border/50 bg-bg/90 text-white shadow-[0_12px_36px_rgba(0,0,0,0.45)] backdrop-blur-md transition-all duration-300 hover:border-accent/55 hover:bg-bg/95 hover:shadow-[0_14px_40px_rgba(212,175,55,0.14)] cursor-pointer group"
-                  >
-                    <ChevronLeft className="h-9 w-9 sm:h-10 sm:w-10 lg:h-11 lg:w-11 text-white/95 group-hover:text-accent transition-colors" strokeWidth={2.5} />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={nextCar}
-                    aria-label="Następny samochód"
-                    className="absolute right-0 sm:right-1 top-1/2 -translate-y-1/2 z-20 flex h-16 w-16 sm:h-[72px] sm:w-[72px] lg:h-20 lg:w-20 items-center justify-center rounded-full border border-border/50 bg-bg/90 text-white shadow-[0_12px_36px_rgba(0,0,0,0.45)] backdrop-blur-md transition-all duration-300 hover:border-accent/55 hover:bg-bg/95 hover:shadow-[0_14px_40px_rgba(212,175,55,0.14)] cursor-pointer group"
-                  >
-                    <ChevronRight className="h-9 w-9 sm:h-10 sm:w-10 lg:h-11 lg:w-11 text-white/95 group-hover:text-accent transition-colors" strokeWidth={2.5} />
-                  </button>
-                </div>
-
-                <div className="flex items-center justify-center gap-3 mt-2 lg:mt-3">
-                  {cars.map((fleetCar, idx) => (
-                    <button
-                      key={fleetCar.id}
-                      onClick={() => setCarIndex(idx)}
-                      aria-label={`Pokaż ${fleetCar.name}`}
-                      className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
-                        idx === carIndex ? 'w-12 bg-accent' : 'w-6 bg-[#2a2a2a] hover:bg-[#3a3a3a]'
-                      }`}
-                    />
-                  ))}
-                </div>
               </motion.div>
             </AnimatePresence>
+            </div>
+
+            {/* Karuzela: sztywna wysokość slotu = środek strzałek nie zależy od wysokości tekstu powyżej */}
+            <div className="relative w-full mb-7 lg:mb-8 h-[320px] sm:h-[390px] lg:h-[480px] xl:h-[520px] shrink-0">
+              <div className="relative h-full w-full overflow-hidden bg-bg isolate">
+                <div
+                  className="absolute inset-0 pointer-events-none z-0 bg-[radial-gradient(ellipse_48%_40%_at_50%_56%,rgba(212,175,55,0.11),transparent_68%)]"
+                  aria-hidden
+                />
+                <AnimatePresence mode="wait" custom={slideDir}>
+                  <motion.div
+                    key={`hero-img-${carIndex}`}
+                    custom={slideDir}
+                    variants={heroImageVariants}
+                    initial="initial"
+                    animate="animate"
+                    exit="exit"
+                    className="absolute inset-0 z-10 flex items-center justify-center px-[4.5rem] py-8 sm:px-24 sm:py-10 lg:px-28 lg:py-12"
+                  >
+                    {!imageErrors[car.id] ? (
+                      <img
+                        src={car.imageUrl}
+                        alt={car.name}
+                        onError={() => handleImageError(car.id)}
+                        className="relative z-10 max-h-[min(520px,88vh)] w-auto max-w-full object-contain object-center [filter:drop-shadow(0_18px_32px_rgba(0,0,0,0.42))]"
+                      />
+                    ) : (
+                      <div className="w-full max-w-lg bg-gradient-to-r from-transparent via-[rgba(212,175,55,0.05)] to-transparent rounded border border-dashed border-[#333] relative flex items-center justify-center overflow-hidden z-10 min-h-[200px]">
+                        <div className="text-center text-text-muted relative z-10 px-4">
+                          <div className="text-3xl lg:text-5xl font-display mb-2 text-white/80">{car.name}</div>
+                          <div className="text-[10px] lg:text-xs tracking-[3px] uppercase">Wizualizacja niedostępna</div>
+                        </div>
+                      </div>
+                    )}
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+
+              {/* Pionowe centrowanie przez flex (bez translate-y na przycisku) — brak „skoku” przy kliknięciu na desktopie */}
+              <div className="pointer-events-none absolute inset-y-0 left-0 z-20 flex w-12 items-center justify-center sm:w-14 lg:w-[5.75rem]">
+                <button
+                  type="button"
+                  onClick={prevCar}
+                  aria-label="Poprzedni samochód"
+                  className="pointer-events-auto flex h-11 w-11 shrink-0 touch-manipulation select-none items-center justify-center rounded-full border border-border/50 bg-bg/90 text-white shadow-[0_8px_22px_rgba(0,0,0,0.4)] backdrop-blur-md outline-none transition-[border-color,box-shadow,background-color] duration-300 hover:border-accent/55 hover:bg-bg/95 hover:shadow-[0_12px_28px_rgba(212,175,55,0.12)] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent/55 cursor-pointer group motion-reduce:transition-none lg:h-[5.5rem] lg:w-[5.5rem] lg:shadow-[0_12px_36px_rgba(0,0,0,0.45)] lg:hover:shadow-[0_14px_40px_rgba(212,175,55,0.14)]"
+                >
+                  <ChevronLeft className="h-6 w-6 text-white/95 group-hover:text-accent transition-colors motion-reduce:transition-none lg:h-11 lg:w-11" strokeWidth={2.5} />
+                </button>
+              </div>
+              <div className="pointer-events-none absolute inset-y-0 right-0 z-20 flex w-12 items-center justify-center sm:w-14 lg:w-[5.75rem]">
+                <button
+                  type="button"
+                  onClick={nextCar}
+                  aria-label="Następny samochód"
+                  className="pointer-events-auto flex h-11 w-11 shrink-0 touch-manipulation select-none items-center justify-center rounded-full border border-border/50 bg-bg/90 text-white shadow-[0_8px_22px_rgba(0,0,0,0.4)] backdrop-blur-md outline-none transition-[border-color,box-shadow,background-color] duration-300 hover:border-accent/55 hover:bg-bg/95 hover:shadow-[0_12px_28px_rgba(212,175,55,0.12)] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent/55 cursor-pointer group motion-reduce:transition-none lg:h-[5.5rem] lg:w-[5.5rem] lg:shadow-[0_12px_36px_rgba(0,0,0,0.45)] lg:hover:shadow-[0_14px_40px_rgba(212,175,55,0.14)]"
+                >
+                  <ChevronRight className="h-6 w-6 text-white/95 group-hover:text-accent transition-colors motion-reduce:transition-none lg:h-11 lg:w-11" strokeWidth={2.5} />
+                </button>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-center gap-3 mt-2 lg:mt-3">
+              {cars.map((fleetCar, idx) => (
+                <button
+                  key={fleetCar.id}
+                  type="button"
+                  onClick={() => {
+                    if (idx === carIndex) return;
+                    setSlideDir(idx > carIndex ? 'next' : 'prev');
+                    setCarIndex(idx);
+                  }}
+                  aria-label={`Pokaż ${fleetCar.name}`}
+                  className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
+                    idx === carIndex ? 'w-12 bg-accent' : 'w-6 bg-[#2a2a2a] hover:bg-[#3a3a3a]'
+                  }`}
+                />
+              ))}
+            </div>
           </div>
         </div>
 
@@ -749,7 +805,7 @@ export default function App() {
       <section className="py-24 px-6 lg:px-12 bg-[#0a0a0a] border-t border-border">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="font-display text-3xl lg:text-4xl mb-4">Wybór Premium dla Wymagających</h2>
+            <h2 className="font-display text-3xl lg:text-4xl mb-4">Nasza oferta</h2>
             <p className="text-text-muted max-w-2xl mx-auto text-sm lg:text-base leading-relaxed">
               <span className="text-white/90 font-medium">{BRAND_DISPLAY}</span> to firma z Białegostoku specjalizująca się w przewozie osób najwyższej klasy.
               Realizujemy transfery lotniskowe, wyjazdy biznesowe, śluby i przejazdy prywatne — zawsze w ramach usługi licencjonowanego przewoźnika, tak abyś wiedział, że w cenie masz nie tylko auto, ale także profesjonalnego kierowcę i zgodny z prawem przewóz pasażerski.
