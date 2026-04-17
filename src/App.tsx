@@ -401,14 +401,16 @@ export default function App() {
         </div>
       </header>
 
-      {/* Hero Section (Carousel + Booking) */}
-      <section className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_440px] xl:grid-cols-[minmax(0,1fr)_500px] min-h-[calc(100vh-90px)] relative">
+      {/* Hero Section — items-start: kolumny nie rozciągają się do wspólnej wysokości; brak justify-center = brak „przeskakiwania” przy zmianie auta */}
+      <section className="grid grid-cols-1 items-start lg:grid-cols-[minmax(0,1fr)_440px] xl:grid-cols-[minmax(0,1fr)_500px] min-h-[calc(100vh-90px)] relative">
         
-        {/* Showcase Section */}
-        <div className="relative p-8 lg:p-12 xl:p-14 flex flex-col justify-center border-r border-border overflow-hidden bg-bg min-h-[640px]">
+        {/* Showcase Section — treść od góry (bez pionowego centrowania całości przy zmianie wysokości) */}
+        <div className="relative p-8 lg:p-12 xl:p-14 flex flex-col justify-start border-r border-border overflow-hidden bg-bg min-h-[640px] lg:min-h-[calc(100vh-90px)]">
 
           {/* Car Info — tekst: znikanie, potem wejście z góry; zdjęcie: szybki swipe poziomy */}
           <div className="relative z-10 max-w-5xl w-full mx-auto lg:mx-0 flex flex-col">
+            {/* Stała min-wysokość: przy AnimatePresence mode="wait" między exit a enter nie zapada się layout (strzałki / panel wyceny bez skoków) */}
+            <div className="min-h-[300px] sm:min-h-[320px] lg:min-h-[340px] xl:min-h-[380px] shrink-0">
             <AnimatePresence mode="wait">
               <motion.div
                 key={`hero-copy-${carIndex}`}
@@ -457,10 +459,11 @@ export default function App() {
                 </p>
               </motion.div>
             </AnimatePresence>
+            </div>
 
-            {/* Karuzela zdjęć: szybki swipe w kierunku slajdu (next = z prawej do lewej) */}
-            <div className="relative w-full mb-7 lg:mb-8">
-              <div className="relative w-full min-h-[320px] sm:min-h-[390px] lg:min-h-[480px] xl:min-h-[520px] overflow-hidden bg-bg isolate">
+            {/* Karuzela: sztywna wysokość slotu = środek strzałek nie zależy od wysokości tekstu powyżej */}
+            <div className="relative w-full mb-7 lg:mb-8 h-[320px] sm:h-[390px] lg:h-[480px] xl:h-[520px] shrink-0">
+              <div className="relative h-full w-full overflow-hidden bg-bg isolate">
                 <div
                   className="absolute inset-0 pointer-events-none z-0 bg-[radial-gradient(ellipse_48%_40%_at_50%_56%,rgba(212,175,55,0.11),transparent_68%)]"
                   aria-hidden
