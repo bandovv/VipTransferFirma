@@ -36,7 +36,7 @@ const cars: FleetCar[] = [
       '2.0L diesel (OM 654) · 237 KM',
       'Napęd 4MATIC · skrzynia 9G-TRONIC'
     ],
-    seats: 'do 5 pasażerów (+ kierowca)',
+    seats: 'do 5 pasażerów',
     luggage: 'Duża przestrzeń bagażowa',
     imageUrl: vClassImage,
     pricing: {
@@ -72,20 +72,20 @@ const cars: FleetCar[] = [
 const testimonials = [
   {
     id: 1,
-    text: "Profesjonalny, licencjonowany przewóz — w cenie był kierowca i pełna obsługa przewoźnika, bez żadnych niespodzianek. Auto w idealnym stanie, punktualność na najwyższym poziomie. Polecam VipTransferBiałystok każdemu, kto ceni spokój i przejrzyste zasady.",
-    author: "Michał K.",
+    text: 'Profesjonalny, licencjonowany przewóz - pełna obsługa przewoźnika, bez żadnych niespodzianek. Auto w idealnym stanie. Polecam :)',
+    author: 'Michał K.',
     rating: 5
   },
   {
     id: 2,
-    text: "Zleciliśmy całodniowy przejazd dla zarządu. W wycenie od razu było widać, że usługa przewoźnika jest wliczona — dyskretny kierowca, auto reprezentacyjne, zero chaosu przy rozliczeniu. Firma godna zaufania.",
-    author: "Anna W.",
+    text: 'Bardzo miły kierowca, auto reprezentacyjne, zero chaosu przy rozliczeniu. Firma godna zaufania, polecam!!!',
+    author: 'Anna W.',
     rating: 5
   },
   {
     id: 3,
-    text: "G-Klasa na ślub z pakietem dekoracji — goście byli zachwyceni, a my mieliśmy pewność, że przewóz jest realizowany przez przewoźnika z odpowiednimi uprawnieniami. Całość na najwyższym poziomie.",
-    author: "Karolina",
+    text: 'Wynajęliśmy G klasę na ślub z pakietem dekoracji, goście byli zachwyceni, a my mieliśmy pewność, że przewóz był realizowany przez bardzo życzliwego kierowcę. Całość na najwyższym poziomie. Bardzo dziękujemy!',
+    author: 'Karolina',
     rating: 5
   }
 ];
@@ -446,9 +446,7 @@ export default function App() {
                     <span className="text-sm lg:text-base font-medium">{car.luggage}</span>
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <span className="text-[10px] lg:text-xs text-text-muted uppercase tracking-[1px] font-bold">
-                      {car.id === 'g-class' ? 'Baza (1. godz.)' : 'Baza'}
-                    </span>
+                    <span className="text-[10px] lg:text-xs text-text-muted uppercase tracking-[1px] font-bold">Baza</span>
                     <span className="text-sm lg:text-base font-medium text-accent">
                       od {car.id === 'g-class' ? car.pricing.hourlyFirst : car.pricing.transferBase} PLN
                     </span>
@@ -497,22 +495,27 @@ export default function App() {
                 </AnimatePresence>
               </div>
 
-              <button
-                type="button"
-                onClick={prevCar}
-                aria-label="Poprzedni samochód"
-                className="pointer-events-auto absolute left-4 top-1/2 z-20 flex h-[5.5rem] w-[5.5rem] shrink-0 -translate-y-1/2 items-center justify-center rounded-full border border-border/50 bg-bg/90 text-white shadow-[0_12px_36px_rgba(0,0,0,0.45)] backdrop-blur-md transition-[border-color,box-shadow,background-color] duration-300 hover:border-accent/55 hover:bg-bg/95 hover:shadow-[0_14px_40px_rgba(212,175,55,0.14)] cursor-pointer group motion-reduce:transition-none"
-              >
-                <ChevronLeft className="h-11 w-11 text-white/95 group-hover:text-accent transition-colors motion-reduce:transition-none" strokeWidth={2.75} />
-              </button>
-              <button
-                type="button"
-                onClick={nextCar}
-                aria-label="Następny samochód"
-                className="pointer-events-auto absolute right-4 top-1/2 z-20 flex h-[5.5rem] w-[5.5rem] shrink-0 -translate-y-1/2 items-center justify-center rounded-full border border-border/50 bg-bg/90 text-white shadow-[0_12px_36px_rgba(0,0,0,0.45)] backdrop-blur-md transition-[border-color,box-shadow,background-color] duration-300 hover:border-accent/55 hover:bg-bg/95 hover:shadow-[0_14px_40px_rgba(212,175,55,0.14)] cursor-pointer group motion-reduce:transition-none"
-              >
-                <ChevronRight className="h-11 w-11 text-white/95 group-hover:text-accent transition-colors motion-reduce:transition-none" strokeWidth={2.75} />
-              </button>
+              {/* Pionowe centrowanie przez flex (bez translate-y na przycisku) — brak „skoku” przy kliknięciu na desktopie */}
+              <div className="pointer-events-none absolute inset-y-0 left-0 z-20 flex w-12 items-center justify-center sm:w-14 lg:w-[5.75rem]">
+                <button
+                  type="button"
+                  onClick={prevCar}
+                  aria-label="Poprzedni samochód"
+                  className="pointer-events-auto flex h-11 w-11 shrink-0 touch-manipulation select-none items-center justify-center rounded-full border border-border/50 bg-bg/90 text-white shadow-[0_8px_22px_rgba(0,0,0,0.4)] backdrop-blur-md outline-none transition-[border-color,box-shadow,background-color] duration-300 hover:border-accent/55 hover:bg-bg/95 hover:shadow-[0_12px_28px_rgba(212,175,55,0.12)] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent/55 cursor-pointer group motion-reduce:transition-none lg:h-[5.5rem] lg:w-[5.5rem] lg:shadow-[0_12px_36px_rgba(0,0,0,0.45)] lg:hover:shadow-[0_14px_40px_rgba(212,175,55,0.14)]"
+                >
+                  <ChevronLeft className="h-6 w-6 text-white/95 group-hover:text-accent transition-colors motion-reduce:transition-none lg:h-11 lg:w-11" strokeWidth={2.5} />
+                </button>
+              </div>
+              <div className="pointer-events-none absolute inset-y-0 right-0 z-20 flex w-12 items-center justify-center sm:w-14 lg:w-[5.75rem]">
+                <button
+                  type="button"
+                  onClick={nextCar}
+                  aria-label="Następny samochód"
+                  className="pointer-events-auto flex h-11 w-11 shrink-0 touch-manipulation select-none items-center justify-center rounded-full border border-border/50 bg-bg/90 text-white shadow-[0_8px_22px_rgba(0,0,0,0.4)] backdrop-blur-md outline-none transition-[border-color,box-shadow,background-color] duration-300 hover:border-accent/55 hover:bg-bg/95 hover:shadow-[0_12px_28px_rgba(212,175,55,0.12)] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent/55 cursor-pointer group motion-reduce:transition-none lg:h-[5.5rem] lg:w-[5.5rem] lg:shadow-[0_12px_36px_rgba(0,0,0,0.45)] lg:hover:shadow-[0_14px_40px_rgba(212,175,55,0.14)]"
+                >
+                  <ChevronRight className="h-6 w-6 text-white/95 group-hover:text-accent transition-colors motion-reduce:transition-none lg:h-11 lg:w-11" strokeWidth={2.5} />
+                </button>
+              </div>
             </div>
 
             <div className="flex items-center justify-center gap-3 mt-2 lg:mt-3">
