@@ -805,7 +805,7 @@ export default function App() {
       <section className="py-24 px-6 lg:px-12 bg-[#0a0a0a] border-t border-border">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="font-display text-3xl lg:text-4xl mb-4">Wybór Premium dla Wymagających</h2>
+            <h2 className="font-display text-3xl lg:text-4xl mb-4">Nasza oferta</h2>
             <p className="text-text-muted max-w-2xl mx-auto text-sm lg:text-base leading-relaxed">
               <span className="text-white/90 font-medium">{BRAND_DISPLAY}</span> to firma z Białegostoku specjalizująca się w przewozie osób najwyższej klasy.
               Realizujemy transfery lotniskowe, wyjazdy biznesowe, śluby i przejazdy prywatne — zawsze w ramach usługi licencjonowanego przewoźnika, tak abyś wiedział, że w cenie masz nie tylko auto, ale także profesjonalnego kierowcę i zgodny z prawem przewóz pasażerski.
