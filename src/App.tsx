@@ -624,8 +624,20 @@ export default function App() {
                 <input
                   type="number"
                   min="1"
-                  value={hours}
-                  onChange={e => setHours(Math.max(1, parseInt(e.target.value, 10) || 1))}
+                  value={hours === 0 ? '' : hours}
+                  onChange={e => {
+                    const raw = e.target.value;
+                    if (raw === '') {
+                      setHours(0);
+                      return;
+                    }
+                    setHours(Math.max(1, parseInt(raw, 10) || 1));
+                  }}
+                  onBlur={() => {
+                    if (!hours || hours < 1) {
+                      setHours(1);
+                    }
+                  }}
                   className="w-full bg-transparent border-b border-[#333] pb-2 text-sm text-white focus:outline-none focus:border-accent transition-colors"
                 />
                 <p className="text-[11px] text-text-muted leading-relaxed">
